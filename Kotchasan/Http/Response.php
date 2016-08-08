@@ -145,7 +145,7 @@ class Response extends Message implements ResponseInterface
    * @return \static
    * @throws \InvalidArgumentException ถ้า $content ไม่ใช่ string
    */
-  public function setContent($content)
+  public function withContent($content)
   {
     if (null !== $content && !is_string($content) && !is_numeric($content) && !is_callable(array($content, '__toString'))) {
       throw new \InvalidArgumentException(sprintf('The Response content must be a string or object implementing __toString(), "%s" given.', gettype($content)));
