@@ -9,8 +9,6 @@
 namespace Index\Index;
 
 use \Kotchasan\Http\Request;
-use \Kotchasan\Orm\Recordset;
-use \Kotchasan\Database;
 
 /**
  * default Controller
@@ -29,7 +27,7 @@ class Controller extends \Kotchasan\Controller
    */
   public function index(Request $request)
   {
-    $action = $request->get('action', 'hello')->toString();
+    $action = $request->get('action', 'hello')->username();
     $this->$action();
   }
 
@@ -48,7 +46,7 @@ class Controller extends \Kotchasan\Controller
    */
   public function select()
   {
-    $rs = Recordset::create('Index\World\Model');
+    $rs = \Kotchasan\Orm\Recordset::create('Index\World\Model');
     $rs->updateAll(array('name' => 'Hello World!'));
     for ($i = 0; $i < 2; $i++) {
       $rnd = mt_rand(1, 10000);
@@ -82,7 +80,7 @@ class Controller extends \Kotchasan\Controller
    */
   public function querybuilder()
   {
-    $db = Database::create();
+    $db = \Kotchasan\Database::create();
     $db->createQuery()->update('world')->set(array('name' => ''))->execute();
     $query = $db->createQuery()->from('world');
     for ($i = 0; $i < 2; $i++) {
@@ -100,7 +98,7 @@ class Controller extends \Kotchasan\Controller
    */
   public function sql()
   {
-    $db = Database::create();
+    $db = \Kotchasan\Database::create();
     $db->query("UPDATE `world` SET `name`=''");
     for ($i = 0; $i < 2; $i++) {
       $rnd = mt_rand(1, 10000);
