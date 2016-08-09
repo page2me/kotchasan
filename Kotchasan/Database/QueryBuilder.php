@@ -295,14 +295,21 @@ class QueryBuilder extends \Kotchasan\Database\Query
    * @return \static
    *
    * @assert select('U.id', 'email name', 'module')->text() [==] "SELECT U.`id`,`email` AS `name`,`module`"
-   * @assert select('"email" name', '0 id')->text() [==] "SELECT 'email' AS `name`,0 AS `id`"
-   * @assert select("'email' name", '0 AS id')->text() [==] "SELECT 'email' AS `name`,0 AS `id`"
+   * @assert select('"email" name', '0 id', '0 `ไอดี`')->text() [==] "SELECT 'email' AS `name`,0 AS `id`,0 AS `ไอดี`"
+   * @assert select("'email' name", '0 AS id', '0 AS ไอดี')->text() [==] "SELECT 'email' AS `name`,0 AS `id`,0 AS `ไอดี`"
    * @assert select("(SELECT FROM) q")->text() [==] "SELECT (SELECT FROM) AS `q`"
    * @assert select()->text()  [==] "SELECT *"
    * @assert select()->where(array('domain', 'kotchasan.com'))->text() [==] "SELECT * WHERE `domain` = 'kotchasan.com'"
    * @assert select('YEAR(date) Y', 'MONTH(date) as D', 'DAY(`date`) as `today`')->text() [==] "SELECT YEAR(date) AS `Y`,MONTH(date) AS `D`,DAY(`date`) AS `today`"
    * @assert select('GROUP_CONCAT(P2.`reciever_id`)')->text() [==] "SELECT GROUP_CONCAT(P2.`reciever_id`)"
    * @assert select("(CASE WHEN ISNULL(U1.`id`) THEN Q.`email` WHEN U1.`displayname`='' THEN U1.`email` ELSE U1.`displayname` END) sender")->text() [==] "SELECT (CASE WHEN ISNULL(U1.`id`) THEN Q.`email` WHEN U1.`displayname`='' THEN U1.`email` ELSE U1.`displayname` END) AS `sender`"
+   * @assert select('name `ชื่อ นามสกุล`', 'U.`idcard` AS `เลขประชาชน`')->text() [==] "SELECT `name` AS `ชื่อ นามสกุล`,U.`idcard` AS `เลขประชาชน`"
+   * @assert select('table.field', '`table`.`field`')->text() [==] "SELECT `table`.`field`,`table`.`field`"
+   * @assert select('table.field field', '`table`.`field` `field`')->text() [==] "SELECT `table`.`field` AS `field`,`table`.`field` AS `field`"
+   * @assert select('table.field AS field', '`table`.`field` AS `field`')->text() [==] "SELECT `table`.`field` AS `field`,`table`.`field` AS `field`"
+   * @assert select('U.field', 'U1.`field`')->text() [==] "SELECT U.`field`,U1.`field`"
+   * @assert select('U.field field', 'U1.`field` `field`')->text() [==] "SELECT U.`field` AS `field`,U1.`field` AS `field`"
+   * @assert select('U.field AS field', 'U1.`field` AS `field`')->text() [==] "SELECT U.`field` AS `field`,U1.`field` AS `field`"
    */
   public function select($fields = '*')
   {
