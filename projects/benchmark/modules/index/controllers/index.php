@@ -62,7 +62,7 @@ class Controller extends \Kotchasan\Controller
    */
   public function recordset()
   {
-    $rs = Recordset::create('Index\World\Model');
+    $rs = \Kotchasan\Orm\Recordset::create('Index\World\Model');
     $rs->updateAll(array('name' => ''));
     for ($i = 0; $i < 2; $i++) {
       $rnd = mt_rand(1, 10000);

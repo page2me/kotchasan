@@ -422,4 +422,12 @@ abstract class Driver extends Query
    * @return boolean สำเร็จ คืนค่า true, ผิดพลาด คืนค่า false
    */
   abstract public function update($table_name, $condition, $save);
+
+  /**
+   * เลือกฐานข้อมูล.
+   *
+   * @param string $database
+   * @return boolean false หากไม่สำเร็จ
+   */
+  abstract public function selectDB($database);
 }

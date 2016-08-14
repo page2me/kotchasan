@@ -65,6 +65,7 @@ class File
     while (false !== ($text = readdir($f))) {
       if ($text !== '.' && $text !== '..') {
         if (is_dir($dir.$text)) {
+          self::makeDirectory($todir.$text.'/');
           self::copyDirectory($dir.$text.'/', $todir.$text.'/');
         } elseif (is_dir($todir)) {
           copy($dir.$text, $todir.$text);

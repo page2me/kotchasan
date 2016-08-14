@@ -171,6 +171,16 @@ class UploadedFile implements UploadedFileInterface
   }
 
   /**
+   * อ่านไฟล์รวม path จากตัวแปร tmp_name
+   *
+   * @return string|null
+   */
+  public function getTempFileName()
+  {
+    return $this->tmp_name;
+  }
+
+  /**
    * อ่านชื่อไฟล์ (ต้นฉบับ) ของไฟล์ที่อัปโหลด
    *
    * @return string|null

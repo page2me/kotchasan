@@ -348,4 +348,12 @@ class PdoMysqlDriver extends Driver
       return false;
     }
   }
+
+  /**
+   * close database
+   */
+  public function close()
+  {
+    $this->connection = null;
+  }
 }
