@@ -1290,7 +1290,28 @@ form .comment {
   max-width: 200px;
 }
 .radiogroups > label, .checkboxgroups > label {
+  padding: 0.25em 1em 0.25em 0.25em;
+  cursor: pointer;
+  float: left;
+  padding-right: 1em;
+}
+.radiogroups.multiline > label, .checkboxgroups.multiline > label {
+  float: none;
   display: block;
+}
+.radiogroups > label > input, .checkboxgroups > label > input {
+}
+.radiogroups, .checkboxgroups {
+  border-width: 1px;
+  border-style: solid;
+  display: block;
+}
+.radiogroups > label:hover, .checkboxgroups > label:hover {
+  background-color: #3297FD;
+  color: #FFF;
+}
+.radiogroups.g-input[class*="icon"], .checkboxgroups.g-input[class*="icon"] {
+  padding-left: 2.5em;
 }
 /* dropdown panel */
 .gdpanel {

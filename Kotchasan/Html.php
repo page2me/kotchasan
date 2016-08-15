@@ -128,17 +128,9 @@ class Html extends \Kotchasan\KBase
         $item->add('div', $comment);
       }
     } elseif ($tag == 'radiogroups' || $tag == 'checkboxgroups') {
-      $class = empty($attributes['class']) ? 'item '.$tag : trim($attributes['class'].' item '.$tag);
-      if (isset($attributes['label'])) {
-        $obj = self::fieldset(array(
-            'class' => $class,
-            'title' => $attributes['label']
-        ));
-      } else {
-        $obj = new static('div', array(
-          'class' => $class
-        ));
-      }
+      $obj = new static('div', array(
+        'class' => 'item'
+      ));
       $this->rows[] = $obj;
       if (isset($attributes['name'])) {
         $name = $attributes['name'];
@@ -147,6 +139,15 @@ class Html extends \Kotchasan\KBase
       } else {
         $name = false;
       }
+      if (isset($attributes['label']) && isset($attributes['id'])) {
+        $obj->add('label', array(
+          'innerHTML' => $attributes['label'],
+          'for' => $attributes['id']
+        ));
+      }
+      $div = $obj->add('div', array(
+        'class' => $tag.(isset($attributes['labelClass']) ? ' '.$attributes['labelClass'] : '').(empty($attributes['multiline']) ? '' : ' multiline')
+      ));
       foreach ($attributes['options'] as $v => $label) {
         if (is_array($attributes['value'])) {
           $checked = isset($attributes['value']) && in_array($v, $attributes['value']);
@@ -166,7 +167,10 @@ class Html extends \Kotchasan\KBase
           $result_id = $attributes['id'];
           unset($attributes['id']);
         }
-        $obj->add($tag == 'radiogroups' ? 'radio' : 'checkbox', $item);
+        if (isset($attributes['comment'])) {
+          $item['title'] = $attributes['comment'];
+        }
+        $div->add($tag == 'radiogroups' ? 'radio' : 'checkbox', $item);
       }
       if (!empty($attributes['comment'])) {
         $obj->add('div', array(

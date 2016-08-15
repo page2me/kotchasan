@@ -72,13 +72,13 @@ class Config
    *
    * @var string
    */
-  public $email_charset = 'tis-620';
+  public $email_charset = 'utf-8';
   /**
    * เลือกโปรแกรมที่ใช้ในการส่งอีเมล์เป็น PHPMailer
    *
    * @var bool
    */
-  public $email_use_phpMailer = false;
+  public $email_use_phpMailer = true;
   /**
    * ชื่อของเมล์เซิร์ฟเวอร์ เช่น localhost หรือ smtp.gmail.com
    *

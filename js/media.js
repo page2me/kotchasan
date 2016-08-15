@@ -28,6 +28,8 @@
       this.addParam('type', 'application/x-mplayer2');
       this.addParam('pluginspage', 'http://www.microsoft.com/Windows/MediaPlayer/');
       this._getPlayer = this._getEmbed;
+    } else if (c.indexOf('.jpg') > -1 || c.indexOf('.jpeg') > -1 || c.indexOf('.gif') > -1 || c.indexOf('.png') > -1) {
+      this._getPlayer = this._getImage;
     } else {
       this._getPlayer = this._getEmbed;
     }
@@ -87,6 +89,9 @@
       }
       a += '</object>';
       return a;
+    },
+    _getImage: function () {
+      return '<img id="' + this.id + '" src="' + this.src + '" />';
     }
   };
 }());

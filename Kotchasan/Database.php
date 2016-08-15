@@ -62,7 +62,7 @@ final class Database
       foreach ($name as $k => $v) {
         $param->settings->$k = $v;
       }
-      $name = Text::rndname(10);
+      $name = rand();
     }
     if (empty(self::$instances[$name])) {
       // โหลด driver (base)
