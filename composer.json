@@ -1,14 +1,15 @@
 {
 	"name": "goragod/kotchasan",
-	"version": "1.0.0",
-	"description": "Kotchasan PHP Framework",
-	"keywords": ["PHP Framework", "PHP", "Web Framework"],
+	"description": "Kotchasan Web Framework",
+	"keywords": ["framework", "php", "kotchasan"],
+   "type": "library",
 	"license": "MIT",
 	"homepage": "http://www.kotchasan.com",
 	"authors": [
 		{
 			"name": "Goragod Wiriya",
-			"homepage": "http://www.goragod.com"
+			"homepage": "http://www.goragod.com",
+        "email":"admin@goragod.com"
 		}
 	],
 	"require": {
