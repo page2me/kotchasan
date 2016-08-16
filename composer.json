@@ -1,6 +1,6 @@
 {
 	"name": "goragod/kotchasan",
-	"version": "1.0.0-beta",
+	"version": "1.0.0",
 	"description": "Kotchasan PHP Framework",
 	"keywords": ["PHP Framework", "PHP", "Web Framework"],
 	"license": "MIT",
