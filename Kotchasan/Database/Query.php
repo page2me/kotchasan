@@ -338,9 +338,9 @@ abstract class Query extends \Kotchasan\KBase
       $ret = $name;
     } else {
       $name = trim($name);
-      if (preg_match('/^(.*?)\(([^\)]+)\)((\s+as)?\s+`?([a-z0-9_]+)`?)?$/i', $name, $match)) {
+      if (strpos($name, '(') !== false && preg_match('/^(.*?)(\s{0,}(as)?\s{0,}`?([a-z0-9_]+)`?)?$/i', $name, $match)) {
         // (...) as pos
-        $ret = "$match[1]($match[2])".(isset($match[5]) ? " AS `$match[5]`" : '');
+        $ret = $match[1].(isset($match[4]) ? " AS `$match[4]`" : '');
       } elseif (preg_match('/^([A-Z0-9]{1,2})\.([\*a-zA-Z0-9_]+)((\s+(as|AS))?\s+([a-zA-Z0-9_]+))?$/', $name, $match)) {
         // U.id as user_id
         $ret = $match[1].'.'.($match[2] == '*' ? '*' : '`'.$match[2].'`').(isset($match[6]) ? ' AS `'.$match[6].'`' : '');
