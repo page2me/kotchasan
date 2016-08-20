@@ -154,11 +154,13 @@ class Form extends \Kotchasan\KBase
       if ($this->tag === 'textarea') {
         $value = str_replace(array('{', '}', '&amp;'), array('&#x007B;', '&#x007D;', '&'), htmlspecialchars($value));
       } else {
-        $prop['value'] = 'value="'.$value.'"';
+        $prop['value'] = 'value="'.htmlspecialchars($value).'"';
       }
     }
-    if (!empty($comment) && empty($prop['title'])) {
-      $prop['title'] = 'title="'.$comment.'"';
+    if (!empty($prop['title'])) {
+      $prop['title'] = 'title="'.strip_tags($prop['title']).'"';
+    } elseif (!empty($comment)) {
+      $prop['title'] = 'title="'.strip_tags($comment).'"';
     }
     if (isset($dataPreview)) {
       $prop['data-preview'] = 'data-preview="'.$dataPreview.'"';

@@ -16,6 +16,9 @@
         action: null,
         actionCallback: null,
         actionConfirm: null,
+        onBeforeDelete: null,
+        onAddRow: null,
+        onInitRow: null,
         pmButton: false,
         dragColumn: -1
       };
@@ -26,6 +29,24 @@
       this.search = o['search'] || '';
       this.sort = o['sort'] || null;
       this.page = o['page'] || 1;
+      if (this.options.onAddRow) {
+        this.options.onAddRow = window[this.options.onAddRow];
+        if (!Object.isFunction(this.options.onAddRow)) {
+          this.options.onAddRow = null
+        }
+      }
+      if (this.options.onBeforeDelete) {
+        this.options.onBeforeDelete = window[this.options.onBeforeDelete];
+        if (!Object.isFunction(this.options.onBeforeDelete)) {
+          this.options.onBeforeDelete = null
+        }
+      }
+      if (this.options.onInitRow) {
+        this.options.onInitRow = window[this.options.onInitRow];
+        if (!Object.isFunction(this.options.onInitRow)) {
+          this.options.onInitRow = null
+        }
+      }
       var hs,
         sort_patt = /sort_(none|asc|desc)\s(col_([\w]+))(|\s.*)$/,
         action_patt = /button[\s][a-z]+[\s]action/,
@@ -58,7 +79,10 @@
             callClick(this, _doSort);
           }
         });
-        this.init(this.table);
+        this.initTR(this.table);
+        forEach(this.table.elems('tbody'), function () {
+          temp.initTBODY(this, null);
+        });
         var doAction = function () {
           var action = '',
             cs = new Array(),
@@ -175,20 +199,23 @@
         }
       });
     },
-    initTR: function (el) {
+    initTBODY: function (tbody, tr) {
       var row = 0,
         temp = this;
-      forEach($G(el).elems('tr'), function () {
-        if (this.parentNode.tagName.toLowerCase() == 'tbody') {
-          this.id = temp.table.id + '_' + row;
-          forEach($G(this).elems('input'), function () {
-            this.id = this.name.replace(/([\[\]_]+)/g, '_') + row;
-          });
-          row++;
+      forEach($G(tbody).elems('tr'), function () {
+        this.id = temp.table.id + '_' + row;
+        forEach($G(this).elems('input'), function () {
+          if (!this.id) {
+            this.id = this.name.replace('[]', '_') + row;
+          }
+        });
+        if ((tr === null || tr === this) && temp.options.onInitRow) {
+          temp.options.onInitRow.call(temp, this, row);
         }
+        row++;
       });
     },
-    init: function (el) {
+    initTR: function (el) {
       var hs,
         a_patt = /(delete|icon)[_\-](plus|minus|[0-9]+)/,
         check_patt = /check_([0-9]+)/,
@@ -200,10 +227,13 @@
           var tbody = tr.parentNode;
           var ntr = tr.copy(false);
           tr.after(ntr);
-          temp.init(ntr);
-          temp.initTR(tbody);
+          temp.initTR(ntr);
+          if (temp.options.onAddRow) {
+            ret = temp.options.onAddRow.call(temp, ntr);
+          }
+          temp.initTBODY(tbody, ntr);
           ntr.highlight();
-          ntr = ntr.getElementsByTagName('input')[0];
+          ntr = ntr.elems('input')[0];
           if (ntr) {
             ntr.focus();
             ntr.select();
@@ -211,9 +241,17 @@
         } else if (c == 'icon-minus') {
           var tr = $G(this.parentNode.parentNode.parentNode);
           var tbody = $G(tr.parentNode);
-          if (tbody.elems('tr').length > 1 && confirm(trans('You want to delete ?'))) {
-            tr.remove();
-            temp.initTR(tbody);
+          if (tbody.elems('tr').length > 1) {
+            var ret = true;
+            if (temp.options.onBeforeDelete) {
+              ret = temp.options.onBeforeDelete.call(temp, tr);
+            } else {
+              ret = confirm(trans('You want to delete ?'));
+            }
+            if (ret) {
+              tr.remove();
+              temp.initTBODY(tbody, false);
+            }
           }
         } else if (hs = a_patt.exec(c)) {
           var action = '';
@@ -231,7 +269,7 @@
                     var tr = $G(temp.table.id + '_' + ds.id);
                     var tbody = tr.parentNode;
                     tr.remove();
-                    temp.initTR(tbody);
+                    temp.initTBODY(tbody, tr);
                   }
                 }
               } else if (xhr.responseText != '') {
@@ -279,9 +317,6 @@
           callClick(this, sClick);
         }
       });
-      if (this.options.pmButton) {
-        this.initTR(el);
-      }
     },
     setSort: function (sort, patt) {
       var hs;

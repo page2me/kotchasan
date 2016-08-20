@@ -214,4 +214,17 @@ class ArrayTool
     }
     return $source;
   }
+
+  /**
+   * อ่านคีย์รายการแรก
+   *
+   * @param array $array
+   * @return mix
+   */
+  public static function getFirstKey($array)
+  {
+    foreach ($array as $key => $value) {
+      return $key;
+    }
+  }
 }

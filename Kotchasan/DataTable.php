@@ -126,10 +126,37 @@ class DataTable extends \Kotchasan\KBase
   private $actionConfirm;
   /**
    * method สำหรับจัดการข้อมูลแต่ละแถวก่อนการแสดงผล
+   * function($item, $index, $prop)
+   * $item array ข้อมูล
+   * $row int ลำดับที่ของข้อมูล (key)
+   * $prop array property ของ tr เช่น $prop[0]['id'] = xxx
    *
    * @var array array($this, methodName)
    */
   private $onRow;
+  /**
+   * ชื่อฟังก์ชั่น Javascript เรียกก่อนที่จะมีการลบแถว (pmButton)
+   * ถ้าฟังก์ชั่นคืนค่า true มา ถึงจะมีการลบแถว
+   * function(tr){return true;}
+   *
+   * @var string
+   */
+  private $onBeforeDelete;
+  /**
+   * ชื่อฟังก์ชั่น Javascript เรียกเมื่อมีการเพิ่มแถวใหม่ (pmButton)
+   * ฟังก์ชั่นนี้จะมีการเรียกใช้ก่อนเรียกใช้ $onInitRow
+   * function(tr)
+   *
+   * @var string
+   */
+  private $onAddRow;
+  /**
+   * ชื่อฟังก์ชั่น Javascript เรียกเพื่อจัดการแถวใหม่
+   * function(tr, row)
+   *
+   * @var string
+   */
+  private $onInitRow;
   /**
    * ลิสต์คำสั่ง Query หลัก สำหรับคัดเลือกข้อมูล
    * array('id', 1) WHERE `id` = 1 AND ...
@@ -577,6 +604,9 @@ class DataTable extends \Kotchasan\KBase
       'action' => $this->action,
       'actionCallback' => $this->actionCallback,
       'actionConfirm' => $this->actionConfirm,
+      'onBeforeDelete' => $this->onBeforeDelete,
+      'onInitRow' => $this->onInitRow,
+      'onAddRow' => $this->onAddRow,
       'pmButton' => $this->pmButton,
       'dragColumn' => $this->dragColumn
     );
@@ -600,15 +630,21 @@ class DataTable extends \Kotchasan\KBase
         $src_items = $items;
         // id ของข้อมูล
         $id = isset($items[$this->primaryKey]) ? $items[$this->primaryKey] : $o;
-        $prop = array('id="'.$this->id.'_'.$id.'"');
+        $prop = array(
+          'id' => $this->id.'_'.$id
+        );
         if (isset($this->onRow)) {
-          $items = call_user_func($this->onRow, $items, $o, $prop);
+          $items = call_user_func($this->onRow, $items, $o, array(&$prop));
         }
         if (isset($this->dragColumn)) {
-          $prop[] = 'class="sort"';
+          $prop['class'] = (empty($prop['class']) ? 'sort' : $prop['class'].' sort');
         }
         // แถว
-        $row[] = '<tr '.implode(' ', $prop).'>';
+        $p = array();
+        foreach ($prop as $k => $v) {
+          $p[] = $k.'="'.$v.'"';
+        }
+        $row[] = '<tr '.implode(' ', $p).'>';
         // แสดงผลข้อมูล
         $i = 0;
         foreach ($this->headers as $field => $attributes) {
