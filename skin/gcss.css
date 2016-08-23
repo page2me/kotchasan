@@ -3039,7 +3039,7 @@ a.skip_content {
   z-index: 10;
   display: inline-block;
   position: fixed;
-  bottom: 2%;
+  bottom: -2%;
   right: 2%;
   font-size: 2em;
   font-family: Tahoma, Loma, Arial;
@@ -3051,9 +3051,9 @@ a.skip_content {
   width: 1.5em;
   text-align: center;
   line-height: 1.8em;
-  border-radius: 5px;
-  -moz-border-radius: 5px;
-  -webkit-border-radius: 5px;
+  border-radius: 50em;
+  -moz-border-radius: 50em;
+  -webkit-border-radius: 50em;
   -webkit-transition: all .2s ease-in-out;
   -moz-transition: all .2s ease-in-out;
   transition: all .2s ease-in-out;

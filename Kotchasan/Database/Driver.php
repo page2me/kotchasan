@@ -11,6 +11,7 @@ namespace Kotchasan\Database;
 use \Kotchasan\Database\QueryBuilder;
 use \Kotchasan\Database\Schema;
 use \Kotchasan\Database\DbCache as Cache;
+use \Kotchasan\Cache\Cacheitem as Item;
 use \Kotchasan\Database\Query;
 use \Kotchasan\Log\Logger;
 use \Kotchasan\ArrayTool;
@@ -61,6 +62,12 @@ abstract class Driver extends Query
    * @var Cache
    */
   protected $cache;
+  /**
+   * Cacheitem
+   *
+   * @var Item
+   */
+  protected $cache_item;
 
   /**
    * Class constructor
@@ -84,13 +91,30 @@ abstract class Driver extends Query
   }
 
   /**
-   * ฟังก์ชั่นคืนค่า Database Cache
+   * ฟังก์ชั่นบันทึก Cache
    *
-   * @param Cache
+   * @param array $datas ข้อมูลที่จะบันทึก
+   * @return boolean สำเร็จคืนค่า true ไม่สำเร็จคืนค่า false
    */
-  public function cache()
+  public function cacheSave($datas)
   {
-    return $this->cache;
+    if ($this->cache_item instanceof Item) {
+      return $this->cache->save($this->cache_item, $datas);
+    }
+    return false;
+  }
+
+  /**
+   * อ่านสถานะของแคช
+   * 0 ไม่ใช้แคช
+   * 1 โหลดและบันทึกแคชอัตโนมัติ
+   * 2 โหลดข้อมูลจากแคชได้ แต่ไม่บันทึกแคชอัตโนมัติ
+   *
+   * @return int
+   */
+  public function cacheGetAction()
+  {
+    return $this->cache->getAction();
   }
 
   /**

@@ -596,8 +596,8 @@ class Recordset extends Query implements \Iterator
       $result = false;
     } else {
       $result = $db->update($this->table_name, $condition, $datas);
-      if ($db->cache()->getAction() == 1) {
-        $db->cache()->save($datas);
+      if ($db->cacheGetAction() == 1) {
+        $db->cacheSave($datas);
       }
     }
     return $result;

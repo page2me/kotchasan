@@ -203,12 +203,12 @@
       var row = 0,
         temp = this;
       forEach($G(tbody).elems('tr'), function () {
-        this.id = temp.table.id + '_' + row;
-        forEach($G(this).elems('input'), function () {
-          if (!this.id) {
-            this.id = this.name.replace('[]', '_') + row;
-          }
-        });
+        if (temp.options.pmButton) {
+          this.id = temp.table.id + '_' + row;
+          forEach($G(this).elems('input'), function () {
+            this.id = this.name.replace(/([\[\]_]+)/g, '_') + row;
+          });
+        }
         if ((tr === null || tr === this) && temp.options.onInitRow) {
           temp.options.onInitRow.call(temp, this, row);
         }
@@ -241,16 +241,20 @@
         } else if (c == 'icon-minus') {
           var tr = $G(this.parentNode.parentNode.parentNode);
           var tbody = $G(tr.parentNode);
-          if (tbody.elems('tr').length > 1) {
-            var ret = true;
-            if (temp.options.onBeforeDelete) {
-              ret = temp.options.onBeforeDelete.call(temp, tr);
-            } else {
-              ret = confirm(trans('You want to delete ?'));
-            }
-            if (ret) {
+          var ret = true;
+          if (temp.options.onBeforeDelete) {
+            ret = temp.options.onBeforeDelete.call(temp, tr);
+          } else if (tbody.elems('tr').length > 1) {
+            ret = confirm(trans('You want to delete ?'));
+          }
+          if (ret) {
+            if (tbody.elems('tr').length > 1) {
               tr.remove();
               temp.initTBODY(tbody, false);
+            } else {
+              if (temp.options.onAddRow) {
+                temp.options.onAddRow.call(temp, tr);
+              }
             }
           }
         } else if (hs = a_patt.exec(c)) {

@@ -40,12 +40,6 @@ class DbCache
    * @var int
    */
   private $action = 0;
-  /**
-   * ข้อมูลแคช
-   *
-   * @var Item
-   */
-  private $item;
 
   /**
    * Class constructor
@@ -69,16 +63,26 @@ class DbCache
   }
 
   /**
+   * กำหนดคีย์ของแคชจาก query
+   * 
+   * @param string $sql
+   * @param array $values
+   * @return Item
+   */
+  public function init($sql, $values)
+  {
+    return $this->db_cache->getItem(Text::replace($sql, $values));
+  }
+
+  /**
    * อ่านข้อมูลจากแคช
    *
-   * @param string $key
-   * @param array $values (options)
+   * @param Item $item
    * @return mixed คืนค่าข้อมูลหรือ false ถ้าไม่มีแคช
    */
-  public function get($sql, $values)
+  public function get(Item $item)
   {
-    $this->item = $this->db_cache->getItem(Text::replace($sql, $values));
-    return $this->item->isHit() ? $this->item->get() : false;
+    return $item->isHit() ? $item->get() : false;
   }
 
   /**
@@ -86,17 +90,15 @@ class DbCache
    * จะใช้คำสั่งนี้เมื่อมีการเรียกใช้แคชด้วยคำสั่ง cacheOn(false) เท่านั้น
    * query ครั้งต่อไปถ้าจะใช้ cache ต้อง เปิดการใช้งาน cache ก่อนทุกครั้ง
    *
+   * @param Item $item
    * @param array $datas ข้อมูลที่จะบันทึก
    * @return boolean สำเร็จคืนค่า true ไม่สำเร็จคืนค่า false
    */
-  public function save($datas)
+  public function save(Item $item, $datas)
   {
     $this->action = 0;
-    if ($this->item instanceof Item) {
-      $this->item->set($datas);
-      return $this->db_cache->save($this->item);
-    }
-    return false;
+    $item->set($datas);
+    return $this->db_cache->save($item);
   }
 
   /**
@@ -113,11 +115,12 @@ class DbCache
   /**
    * ตรวจสอบว่าข้อมูลมาจาก cache หรือไม่
    *
+   * @param Item $item
    * @return bool
    */
-  public function usedCache()
+  public function usedCache(Item $item)
   {
-    return $this->item->isHit();
+    return $item->isHit();
   }
 
   /**

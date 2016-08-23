@@ -65,7 +65,8 @@ class PdoMysqlDriver extends Driver
   {
     $action = $this->cache->getAction();
     if ($action) {
-      $result = $this->cache->get($sql, $values);
+      $cache = $this->cache->init($sql, $values);
+      $result = $this->cache->get($cache);
     } else {
       $result = false;
     }
@@ -80,7 +81,9 @@ class PdoMysqlDriver extends Driver
         self::$query_count++;
         $result = $this->result_id->fetchAll(PDO::FETCH_ASSOC);
         if ($action == 1) {
-          $this->cache->save($result);
+          $this->cache->save($cache, $result);
+        } elseif ($action == 2) {
+          $this->cache_item = $cache;
         }
       } catch (PDOException $e) {
         $this->error_message = $e->getMessage();
@@ -89,6 +92,7 @@ class PdoMysqlDriver extends Driver
       $this->log('Database', $sql, $values);
     } else {
       $this->cache->setAction(0);
+      $this->cache_item = null;
       $this->log('Cached', $sql, $values);
     }
     return $result;
