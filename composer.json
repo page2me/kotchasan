@@ -2,7 +2,7 @@
 	"name": "goragod/kotchasan",
 	"description": "Kotchasan Web Framework",
 	"keywords": ["framework", "php", "kotchasan"],
-   "type": "library",
+   "type": "package",
 	"license": "MIT",
   "version": "dev-master",
 	"homepage": "http://www.kotchasan.com",
