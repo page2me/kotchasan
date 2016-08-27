@@ -4,6 +4,7 @@
 	"keywords": ["framework", "php", "kotchasan"],
    "type": "library",
 	"license": "MIT",
+  "version": "dev-master",
 	"homepage": "http://www.kotchasan.com",
 	"authors": [
 		{
