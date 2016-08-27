@@ -408,7 +408,7 @@ header p, footer p {
 .sidebar {
   width: 230px;
 }
-.wide > .sidebar {
+body.wide .sidebar {
   width: 310px;
 }
 .leftsidebar {
@@ -435,16 +435,16 @@ header p, footer p {
   margin-right: -230px;
   padding-left: 10px;
 }
-.leftsidebar.wide {
+body.wide .leftsidebar {
   padding-left: 310px;
 }
-.leftsidebar.wide > .sidebar {
+body.wide .leftsidebar > .sidebar {
   margin-left: -310px;
 }
-.rightsidebar.wide {
+body.wide .rightsidebar {
   padding-right: 310px;
 }
-.rightsidebar.wide > .sidebar {
+body.wide .rightsidebar > .sidebar {
   margin-right: -310px;
 }
 .clear,

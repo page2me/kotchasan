@@ -32,6 +32,7 @@ class Grid extends \Kotchasan\Template
   public function setCols($cols)
   {
     $this->cols = max(1, (int)$cols);
+    $this->num = $this->cols;
     return $this;
   }
 

@@ -109,15 +109,11 @@ class Template
    */
   public function add($array)
   {
-    $datas = array();
-    foreach ($array as $key => $value) {
-      $datas[$key] = $value;
-    }
     if ($this->cols > 0 && $this->num == 0) {
       $this->items[] = "</div>\n<div class=row>";
       $this->num = $this->cols;
     }
-    $this->items[] = self::pregReplace(array_keys($datas), array_values($datas), $this->skin);
+    $this->items[] = self::pregReplace(array_keys($array), array_values($array), $this->skin);
     $this->num--;
     return $this;
   }
