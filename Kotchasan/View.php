@@ -116,12 +116,10 @@ class View extends \Kotchasan\KBase
     if (!empty($this->metas)) {
       $this->contents['/(<head.*)(<\/head>)/isu'] = '$1'.implode("\n", $this->metas)."\n".'$2';
     }
-    $this->contents['/{LNG_([^}]+)}/e'] = '\Kotchasan\Language::get(array(1=>"$1"))';
     $this->contents['/{WEBTITLE}/'] = self::$cfg->web_title;
     $this->contents['/{WEBDESCRIPTION}/'] = self::$cfg->web_description;
     $this->contents['/{WEBURL}/'] = WEB_URL;
     $this->contents['/{SKIN}/'] = Template::$src;
-    $this->contents['/{LANGUAGE}/'] = \Kotchasan\Language::name();
     $this->contents['/^[\s\t]+/m'] = '';
     foreach ($this->after_contents as $key => $value) {
       $this->contents[$key] = $value;

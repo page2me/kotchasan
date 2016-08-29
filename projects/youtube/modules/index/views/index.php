@@ -21,8 +21,8 @@ class View extends \Kotchasan\View
   public function render()
   {
     /*
-     * Youtube API Key
-     * http://gcms.in.th/howto/%E0%B8%81%E0%B8%B2%E0%B8%A3%E0%B8%AA%E0%B8%A3%E0%B9%89%E0%B8%B2%E0%B8%87%E0%B8%84%E0%B8%B5%E0%B8%A2%E0%B9%8C%E0%B8%AA%E0%B8%B3%E0%B8%AB%E0%B8%A3%E0%B8%B1%E0%B8%9A%E0%B9%83%E0%B8%8A%E0%B9%89%E0%B8%87%E0%B8%B2%E0%B8%99_youtube_api_v3.html
+     * Youtube API Key ถ้า สามารถหาได้จาก
+     * http://gcms.in.th/howto/การสร้างคีย์สำหรับใช้งาน_Youtube_API_V3.html
      */
     $youtube_api_key = 'AIzaSyC2ivSRvKquKXDgmt3cpeqZUww8rO7Hbkk';
     /*
