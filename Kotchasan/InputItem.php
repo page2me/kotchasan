@@ -313,7 +313,7 @@ class InputItem
       /* BBCode ทั่วไป [b],[i] */
       '/\[([a-z]+)([\s=].*)?\](.*?)\[\/\\1\]/ui' => '\\3',
       /* ตัวอักษรที่ไม่ต้องการ */
-      '/(&amp;|&quot;|&nbsp;|[_\(\)\-\+\r\n\s\"\'<>\.\/\\\?&\{\}]){1,}/isu' => ' '
+      '/(&rdquo;|&quot;|&nbsp;|&amp;|[_\(\)\-\+\r\n\s\"\'”<>\.\/\\\?&\{\}]){1,}/isu' => ' '
     );
     $text = trim(preg_replace(array_keys($patt), array_values($patt), $this->value));
     return $this->cut($text, $len);
@@ -344,7 +344,7 @@ class InputItem
    */
   public function keywords($len = 0)
   {
-    $text = trim(preg_replace('/[_\(\)\-\+\r\n\s\"\'<>\.\/\\\?&\{\}]{1,}/isu', ' ', strip_tags($this->value)));
+    $text = trim(preg_replace('/[_\(\)\-\+\r\n\s\"\'”<>\.\/\\\?&\{\}]{1,}/isu', ' ', strip_tags($this->value)));
     return $this->cut($text, $len);
   }
 

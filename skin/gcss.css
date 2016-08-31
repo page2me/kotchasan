@@ -2814,7 +2814,7 @@ tr.bg2, .tr.bg2 {
   background-color: #F9F9F9;
   background-color: rgba(0,0,0,0.01);
 }
-tr:hover, tr.highlight, tr.select {
+tbody tr:hover, tbody tr.highlight, tbody tr.select, .data tfoot tr {
   background-color: rgba(0,0,0,0.02);
 }
 .border.horiz-table > thead > tr > td,
@@ -2856,6 +2856,7 @@ table.border > caption,
 .data > caption,
 .data > tbody > tr > th[scope="rowgroup"] {
   background-color: #DDD;
+  background-color: rgba(0,0,0,0.1);
   text-shadow: 1px 1px 0 rgba(255,255,255,0.5);
 }
 .data > thead > tr,
@@ -2865,6 +2866,9 @@ table.border > caption,
 .data > thead > tr.bg2,
 .data > tbody > tr.bg2 {
   background-color: rgb(249, 249, 249);
+}
+.data > tfoot > tr:first-child td {
+  border-top: none;
 }
 .data {
   border-style: none;
