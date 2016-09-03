@@ -62,7 +62,7 @@ class Menu
     }
     if (!empty($item['url'])) {
       $a = array('href="'.$item['url'].'"');
-      if (isset($item['target'])) {
+      if (!empty($item['target'])) {
         $a[] = 'target="'.$item['target'].'"';
       }
     }

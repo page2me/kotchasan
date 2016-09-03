@@ -17,7 +17,7 @@ namespace Kotchasan;
  *
  * @setupParam '1234567890'
  */
-class Password
+class Password extends \Kotchasan\KBase
 {
   /**
    * คีย์สำหรับการเข้ารหัส ถอดรหัส
@@ -29,11 +29,11 @@ class Password
   /**
    * class constructor
    *
-   * @param string $key กำหนดคีย์สำหรับการเข้ารหัส ถอดรหัส
+   * @param string $key กำหนดคีย์สำหรับการเข้ารหัส ถอดรหัส ถ้าไม่กำหนดมาจะใช้ค่าจาก Config
    */
-  public function __construct($key)
+  public function __construct($key = null)
   {
-    $this->password_key = $key;
+    $this->password_key = $key === null ? self::$cfg->password_key : $key;
   }
 
   /**
