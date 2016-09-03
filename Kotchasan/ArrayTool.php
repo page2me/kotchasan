@@ -227,4 +227,64 @@ class ArrayTool
       return $key;
     }
   }
+
+  /**
+   * แทรกข้อมูลลงในแอเรย์ ข้อมูลที่จะนำมาแทรกอยู่ก่อน
+   * ถ้าไม่พบ $find ข้อมูลจะแทรกรายการสุดท้าย
+   *
+   * @param array $source แอเรย์ต้นฉบับ
+   * @param int|string $find คีย์ของแอเรย์ต้นฉบับจุดที่จะแทรก ข้อมูลต้องเป็นชนิดเดียวกันกับคีย์ของแอเรย์ต้นฉบับ
+   * @param int|string $key คีย์ของข้อมูลที่จะนำมาแทรก
+   * @param mixed $value ข้อมูลที่จะนำมาแทรก
+   * @return array
+   *
+   * @assert (array('one' => 1, 'three' => 3), 'three', 'two', 2) [==] array('one' => 1, 'two' => 2, 'three' => 3)
+   * @assert (array(1 => 'one', 3 => 'three'), 3, 2, 'two') [==] array(1 => 'one', 2 => 'two', 3 => 'three')
+   * @assert (array(1 => 'one', 3 => 'three'), 2, 2, 'two') [==] array(1 => 'one', 3 => 'three', 2 => 'two')
+   */
+  public static function insertBefore($source, $find, $key, $value)
+  {
+    $result = array();
+    foreach ($source as $k => $v) {
+      if ($find && $find === $k) {
+        $result[$key] = $value;
+        $find = null;
+      }
+      $result[$k] = $v;
+    }
+    if ($find !== null) {
+      $result[$key] = $value;
+    }
+    return $result;
+  }
+
+  /**
+   * แทรกข้อมูลลงในแอเรย์ ข้อมูลที่จะนำมาแทรกอยู่ถัดไป
+   * ถ้าไม่พบ $find ข้อมูลจะแทรกรายการสุดท้าย
+   *
+   * @param array $source แอเรย์ต้นฉบับ
+   * @param int|string $find คีย์ของแอเรย์ต้นฉบับจุดที่จะแทรก ข้อมูลต้องเป็นชนิดเดียวกันกับคีย์ของแอเรย์ต้นฉบับ
+   * @param int|string $key คีย์ของข้อมูลที่จะนำมาแทรก
+   * @param mixed $value ข้อมูลที่จะนำมาแทรก
+   * @return array
+   *
+   * @assert (array('one' => 1, 'two' => 2), 'two', 'three', 3) [==] array('one' => 1, 'two' => 2, 'three' => 3)
+   * @assert (array(1 => 'one', 2 => 'two'), 2, 3, 'three') [==] array(1 => 'one', 2 => 'two', 3 => 'three')
+   * @assert (array(1 => 'one', 2 => 'two'), 3, 3, 'three') [==] array(1 => 'one', 2 => 'two', 3 => 'three')
+   */
+  public static function insertAfter($source, $find, $key, $value)
+  {
+    $result = array();
+    foreach ($source as $k => $v) {
+      $result[$k] = $v;
+      if ($find && $find === $k) {
+        $result[$key] = $value;
+        $find = null;
+      }
+    }
+    if ($find !== null) {
+      $result[$key] = $value;
+    }
+    return $result;
+  }
 }
