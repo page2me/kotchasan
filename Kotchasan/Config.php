@@ -133,7 +133,7 @@ class Config
    *
    * @var array
    */
-  public $login_fields = array('email');
+  public $login_fields = array('username');
 
   /**
    * เรียกใช้งาน Class แบบสามารถเรียกได้ครั้งเดียวเท่านั้น
