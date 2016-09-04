@@ -39,5 +39,5 @@
 * http://projects.kotchasan.com/recordset/ ตัวอย่างการใช้งานฐานข้อมูล (Recordset)
 * http://projects.kotchasan.com/admin/ ตัวอย่างการใช้งานฟอร์ม Login
 * http://projects.kotchasan.com/youtube/ ตัวอย่างการใช้งาน Youtube API
-* http://projects.kotchasan.com/pdf/ ตัวอย่างการแปลง HTML เป็น PDF
+* http://www.kotchasan.com/projects/pdf/ ตัวอย่างการแปลง HTML เป็น PDF
 * http://workshop.kotchasan.com/office/admin/ ตัวอย่างการสร้างแอพพลิเคชั่นอย่างง่าย มีระบบสมาชิกและการ Login
