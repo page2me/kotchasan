@@ -78,6 +78,10 @@ class Form extends \Kotchasan\KBase
           break;
         case 'result':
           $prop[$k] = 'data-'.$k.'="'.$v.'"';
+          break;
+        case 'title':
+          $prop['title'] = 'title="'.strip_tags($v).'"';
+          break;
         default:
           if (is_int($k)) {
             $prop[$v] = $v;
@@ -157,9 +161,7 @@ class Form extends \Kotchasan\KBase
         $prop['value'] = 'value="'.str_replace('&amp;', '&', htmlspecialchars($value)).'"';
       }
     }
-    if (!empty($prop['title'])) {
-      $prop['title'] = 'title="'.strip_tags($prop['title']).'"';
-    } elseif (!empty($comment)) {
+    if (empty($prop['title']) && !empty($comment)) {
       $prop['title'] = 'title="'.strip_tags($comment).'"';
     }
     if (isset($dataPreview)) {
