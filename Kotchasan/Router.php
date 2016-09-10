@@ -61,7 +61,9 @@ class Router extends \Kotchasan\KBase
       // ไม่ระบุเมธอดมา เรียกเมธอด index
       $method = empty($modules['_method']) ? 'index' : $modules['_method'];
     }
-    if (method_exists($className, $method)) {
+    if (!class_exists($className)) {
+      throw new \InvalidArgumentException('Class '.$className.' not found');
+    } elseif (method_exists($className, $method)) {
       // สร้างคลาส
       $obj = new $className;
       // เรียกเมธอด
