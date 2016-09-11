@@ -40,11 +40,13 @@ html {
 @-webkit-keyframes bugfix {from {padding: 0;} to {padding: 0;}}
 body {
   font-size: 12px;
-  line-height: 1.6;
   position: relative;
   background-color: #FFF;
   font-family: Tahoma, Loma, Arial, Helvetica, sans-serif;
   -webkit-animation: bugfix infinite 1s;
+}
+body, li {
+  line-height: 1.4;
 }
 table, caption, thead, tbody, tfoot, tr, td, th, p, div, article, section, header, h1, h2, h3, h4, h5, h6, footer, .table, .tr, .th, .td, ul, ol {
   border-color: inherit;
@@ -141,6 +143,7 @@ p {
 ul,
 ol {
   padding: 10px 0 10px 25px;
+  line-height: 0;
 }
 html[dir="rtl"] ul,
 html[dir="rtl"] ol {
@@ -2638,12 +2641,17 @@ blockquote {
   background-color: #F9F9F9;
   background-color: rgba(0,0,0,0.04);
   font-family: Tahoma, Loma, Arial, Helvetica, sans-serif;
+  margin-top: 10px;
+  margin-bottom: 10px;
+}
+code + br,
+blockquote + br {
+  display: none;
 }
 code {
   border-width: 1px;
   border-style: solid;
   border-color: #DDD;
-  margin-top: 10px;
   padding: 10px;
   overflow-x: auto;
   overflow-y: hidden;
@@ -2653,7 +2661,6 @@ blockquote {
   font-style: italic;
   position: relative;
   padding: 10px 10px 10px 45px;
-  margin: 10px 0;
 }
 blockquote > b:first-child {
   display: block;
@@ -2675,6 +2682,13 @@ code code,
 blockquote blockquote {
   margin-right: 10px;
   padding-right: 0;
+}
+code ol,
+blockquote ol,
+code ul,
+blockquote ul {
+  padding-top: 0;
+  padding-bottom: 0;
 }
 /* tooltip */
 body .tooltip-right,

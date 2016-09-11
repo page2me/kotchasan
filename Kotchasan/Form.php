@@ -39,6 +39,20 @@ class Form extends \Kotchasan\KBase
    * @var string
    */
   public $javascript;
+  /**
+   * ตับแปรบอกว่ามีการใช้ form แบบ Ajax หรือไม่
+   * ถ้าใช้งานต้องมีการเรียกใช้ GAjax ด้วย
+   *
+   * @var boolean
+   */
+  public $ajax;
+  /**
+   * ตัวแปรบอกว่ามีการใช้งานฟอร์มร่วมกับ GForm หรือไม่
+   * ถ้าใช้งานต้องมีการเรียกใช้ GAjax ด้วย
+   *
+   * @var boolean
+   */
+  public $gform;
 
   /**
    * ฟังก์ชั่นสร้าง Form Element
@@ -102,7 +116,7 @@ class Form extends \Kotchasan\KBase
       $name = $id;
       $prop['name'] = 'name="'.$name.'"';
     }
-    if (isset($id)) {
+    if (isset($id) && Html::$form->gform) {
       if (isset($validator)) {
         $js = array();
         $js[] = '"'.$id.'"';
@@ -118,6 +132,10 @@ class Form extends \Kotchasan\KBase
       }
       foreach ($event as $on => $func) {
         $this->javascript[] = '$G("'.$id.'").addEvent("'.$on.'", '.$func.');';
+      }
+    } elseif (!Html::$form->gform) {
+      foreach ($event as $on => $func) {
+        $prop['on'.$on] = 'on'.$on.'="'.$func.'()"';
       }
     }
     if ($this->tag == 'select') {

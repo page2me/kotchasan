@@ -251,7 +251,7 @@ class Html extends \Kotchasan\KBase
     $gform = true;
     $token = false;
     foreach ($attributes as $key => $value) {
-      if ($key === 'ajax' || $key === 'action' || $key === 'onsubmit' || $key === 'confirmsubmit' ||
+      if ($key === 'ajax' || $key === 'action' || $key === 'onsubmit' || $key === 'onbeforesubmit' ||
         $key === 'elements' || $key === 'script' || $key === 'gform' || $key === 'token') {
         $$key = $value;
       } else {
@@ -263,8 +263,8 @@ class Html extends \Kotchasan\KBase
       if (isset($action)) {
         if ($ajax) {
           $script .= ', "'.$action.'"';
-          if (isset($confirmsubmit)) {
-            $script .= ',null ,false , function(){return '.$confirmsubmit.'}';
+          if (isset($onbeforesubmit)) {
+            $script .= ',null ,false , function(){return '.$onbeforesubmit.'}';
           }
         } else {
           $prop['action'] = $action;
@@ -276,10 +276,20 @@ class Html extends \Kotchasan\KBase
       }
       $script .=';';
       $form_inputs = Form::get2Input();
-    } elseif (isset($action)) {
-      $prop['action'] = $action;
+    } else {
+      if (isset($action)) {
+        $prop['action'] = $action;
+      }
+      if (isset($onsubmit)) {
+        $prop['onsubmit'] = $onsubmit.'()';
+      }
+      if (isset($onbeforesubmit)) {
+        $prop['onbeforesubmit'] = $onbeforesubmit.'()';
+      }
     }
     self::$form = new static('form', $prop);
+    self::$form->ajax = $ajax;
+    self::$form->gform = $gform;
     if (!empty($form_inputs)) {
       self::$form->rows = $form_inputs;
     }
