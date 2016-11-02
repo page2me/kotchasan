@@ -17,7 +17,7 @@ use \Kotchasan\Orm\Recordset;
  *
  * @since 1.0
  */
-class Field extends \Kotchasan\KBase
+class Field extends \Kotchasan\Database\Db
 {
   /**
    * ชื่อของการเชื่อมต่อ ใช้สำหรับโหลด config จาก settings/database.php
@@ -43,6 +43,18 @@ class Field extends \Kotchasan\KBase
    * @var string
    */
   protected $table;
+  /**
+   * ชื่อรองของตาราง
+   *
+   * @var string
+   */
+  public $table_alias;
+  /**
+   * ชื่อตาราง
+   *
+   * @var string
+   */
+  public $table_name;
 
   /**
    * class constructor
@@ -58,6 +70,34 @@ class Field extends \Kotchasan\KBase
       $this->exists = true;
     } else {
       $this->exists = false;
+    }
+  }
+
+  /**
+   * ฟังก์ชั่นตรวจสอบชื่อตารางและชื่อรอง
+   *
+   * @param \Kotchasan\Database\Query $db
+   */
+  public function initTableName($db)
+  {
+    $this->db = $db;
+    if (empty($this->table)) {
+      $class = get_called_class();
+      if (preg_match('/[a-z0-9]+\\\\([a-z0-9_]+)\\\\Model/i', $class, $match)) {
+        $t = strtolower($match[1]);
+      } elseif (preg_match('/Models\\\\([a-z0-9_]+)/i', $class, $match)) {
+        $t = strtolower($match[1]);
+      } else {
+        $t = strtolower($class);
+      }
+      $this->table_name = $this->getFullTableName($t);
+      $this->table_alias = $t;
+    } elseif (preg_match('/([a-z0-9A-Z_]+)(\s+(as|AS))?\s+([a-zA-Z0-9]{1,})/', $this->table, $match)) {
+      $this->table_name = $this->getFullTableName($match[1]);
+      $this->table_alias = sizeof($match[4]) < 3 ? $match[4] : '`'.$match[4].'`';
+    } else {
+      $this->table_name = $this->getFullTableName($this->table);
+      $this->table_alias = '`'.$this->table.'`';
     }
   }
 
@@ -109,9 +149,20 @@ class Field extends \Kotchasan\KBase
    *
    * @return string
    */
-  public function getTable()
+  public function getTableName()
   {
-    return $this->table;
+    return $this->table_name;
+  }
+
+  /**
+   * อ่านชื่อตารางรวม Alias
+   *
+   * @param string|null $alias Alias ที่ต้องการ ถ้าไม่ระบุจะใช้ Alias ตามที่กำหนดไว้
+   * @return string
+   */
+  public function getTableWithAlias($alias = null)
+  {
+    return $this->table_name.' AS '.(empty($alias) ? $this->table_alias : $alias);
   }
 
   /**
@@ -122,5 +173,18 @@ class Field extends \Kotchasan\KBase
   public function getPrimarykey()
   {
     return $this->primaryKey;
+  }
+
+  /**
+   * ฟังก์ชั่นอ่านชื่อตารางจากการตั้งค่าฐานข้อมุล
+   *
+   * @param string $table ชื่อตารางตามที่กำหนดใน settings/datasbase.php
+   * @return string ชื่อตารางรวม prefix ถ้าไม่มีชื่อกำหนดไว้ จะคืนค่า $table ครอบชื่อตารางด้วย ``
+   */
+  public function getFullTableName($table)
+  {
+    $dbname = empty($this->db->settings->dbname) ? '' : '`'.$this->db->settings->dbname.'`.';
+    $prefix = empty($this->db->settings->prefix) ? '' : $this->db->settings->prefix.'_';
+    return $dbname.'`'.$prefix.(isset($this->db->tables->$table) ? $this->db->tables->$table : $table).'`';
   }
 }

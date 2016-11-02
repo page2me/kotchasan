@@ -32,6 +32,7 @@ class Controller extends \Kotchasan\Controller
   {
     // อ่านรายชื่อฟิลด์ของตาราง
     $rs = Recordset::create('Index\World\Model');
+    $result = $rs->find(100);
     $fields = $rs->getFields();
     echo implode(', ', array_keys($fields)).'<br>';
     // ลบข้อมูลทั้งตาราง

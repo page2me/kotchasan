@@ -58,7 +58,10 @@
       var _mouseclick = function () {
         if (showing) {
           _hide();
-          options.callBack.call(this.datas);
+          try {
+            options.callBack.call(this.datas);
+          } catch (e) {
+          }
         }
       };
       var _mousemove = function () {

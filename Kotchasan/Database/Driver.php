@@ -226,26 +226,6 @@ abstract class Driver extends Query
   }
 
   /**
-   * ฟังก์ชั่นตรวจสอบว่ามีฟิลด์ หรือไม่.
-   *
-   * @param string $table_name ชื่อตาราง
-   * @param string $field ชื่อฟิลด์
-   * @return boolean คืนค่า true หากมีฟิลด์นี้อยู่ ไม่พบคืนค่า false
-   */
-  public function fieldExists($table_name, $field)
-  {
-    if (!empty($table_name) && !empty($field)) {
-      $field = strtolower($field);
-      foreach (Schema::create($this->db)->fields($table_name) as $key => $values) {
-        if (strtolower($key) == $field) {
-          return true;
-        }
-      }
-    }
-    return false;
-  }
-
-  /**
    * ฟังก์ชั่น query ข้อมูล คืนค่าข้อมูลทุกรายการที่ตรงตามเงื่อนไข
    *
    * @param string $table_name ชื่อตาราง
@@ -370,6 +350,19 @@ abstract class Driver extends Query
   public function tableExists($table_name)
   {
     return $this->doQuery("SELECT 1 FROM $table_name LIMIT 1") === false ? false : true;
+  }
+
+  /**
+   * ตรวจสอบฟิลด์
+   *
+   * @param string $table_name
+   * @param type $field
+   * @return boolean
+   */
+  public function fieldExists($table_name, $field)
+  {
+    $result = $this->customQuery("SHOW COLUMNS FROM `$table_name` LIKE '$field'");
+    return empty($result) ? false : true;
   }
 
   /**

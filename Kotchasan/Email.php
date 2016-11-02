@@ -39,7 +39,7 @@ class Email extends \Kotchasan\Model
     } else {
       $replyto = array($replyto, $replyto);
     }
-    if ($charset !== 'utf-8') {
+    if ($charset != 'utf-8') {
       $subject = iconv('utf-8', $charset, $subject);
       $msg = iconv('utf-8', $charset, $msg);
       $replyto[1] = iconv('utf-8', $charset, $replyto[1]);
@@ -49,12 +49,13 @@ class Email extends \Kotchasan\Model
       // ส่งอีเมล์ด้วยฟังก์ชั่นของ PHP
       foreach (explode(',', $mailto) as $email) {
         $headers = "MIME-Version: 1.0\r\n";
-        $headers .= "Content-type: text/html; charset=$charset\r\n";
-        $headers .= "Content-Transfer-Encoding: quoted-printable\r\n";
-        $headers .= "To: $email\r\n";
-        $headers .= "From: $replyto[1]\r\n";
+        $headers .= "Content-type: text/html; charset=".strtoupper($charset)."\r\n";
+        $headers .= "From: ".strip_tags($replyto[1])."\r\n";
         $headers .= "Reply-to: $replyto[0]\r\n";
-        $headers .= "X-Mailer: PHP mailer\r\n";
+        if (function_exists('imap_8bit')) {
+          $subject = "=?$charset?Q?".imap_8bit($subject)."?=";
+          $msg = imap_8bit($msg);
+        }
         if (!@mail($email, $subject, $msg, $headers)) {
           $messages = array(Language::get('Unable to send mail'));
         }

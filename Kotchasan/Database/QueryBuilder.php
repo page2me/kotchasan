@@ -431,13 +431,14 @@ class QueryBuilder extends \Kotchasan\Database\Query
   public function union($querys)
   {
     $this->sqls['union'] = array();
+    $querys = is_array($querys) ? $querys : func_get_args();
     foreach ($querys as $item) {
       if ($item instanceof QueryBuilder) {
         $this->sqls['union'][] = $item->text();
       } elseif (is_string($item)) {
         $this->sqls['union'][] = $item;
       } else {
-        $this->logError($item, 'Invalid arguments in UNION');
+        throw new \InvalidArgumentException('Invalid arguments in '.__METHOD__);
       }
     }
     $this->sqls['function'] = 'customQuery';

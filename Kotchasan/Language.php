@@ -237,7 +237,7 @@ final class Language extends \Kotchasan\KBase
     $datas = array();
     foreach ($languages as $items) {
       foreach ($items as $key => $value) {
-        if (!in_array($key, array('id', 'key', 'array'))) {
+        if (!in_array($key, array('id', 'key', 'array', 'owner', 'type', 'js'))) {
           $datas[$key][$items['key']] = $value;
         }
       }

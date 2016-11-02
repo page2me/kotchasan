@@ -122,20 +122,26 @@
             patt = /^([a-z_\-]+)_([0-9]+)(_([0-9]+))?$/;
           if (temp.options.actionConfirm) {
             var fn = window[temp.options.actionConfirm];
-            if (Object.isFunction(fn)) {
-              hs = patt.exec(this.id);
+            hs = patt.exec(this.id);
+            if (hs && Object.isFunction(fn)) {
               var t = this.getText();
               t = t ? t.strip_tags() : null;
               action = fn(t, hs[1], hs[2], hs[4]);
+            } else {
+              action = 'action=' + this.id;
             }
           } else {
             hs = patt.exec(this.id);
-            if (hs[1] == 'delete') {
-              if (confirm(trans('You want to delete ?'))) {
-                action = 'action=delete&id=' + hs[2];
+            if (hs) {
+              if (hs[1] == 'delete') {
+                if (confirm(trans('You want to delete ?'))) {
+                  action = 'action=delete&id=' + hs[2];
+                }
+              } else {
+                action = 'action=' + hs[1] + '&id=' + hs[2];
               }
             } else {
-              action = 'action=' + hs[1] + '&id=' + hs[2];
+              action = 'action=' + this.id;
             }
           }
           if (action != '') {

@@ -46,10 +46,14 @@ class PdoMysqlDriver extends Driver
     $sql = $this->settings->dbdriver.':host='.$this->settings->hostname;
     $sql .= empty($this->settings->port) ? '' : ';port='.$this->settings->port;
     $sql .= empty($this->settings->dbname) ? '' : ';dbname='.$this->settings->dbname;
-    try {
-      $this->connection = new \PDO($sql, $this->settings->username, $this->settings->password, $this->options);
-    } catch (\PDOException $e) {
-      $this->logError(__FUNCTION__, $e->getMessage());
+    if (isset($this->settings->username) && isset($this->settings->password)) {
+      try {
+        $this->connection = new \PDO($sql, $this->settings->username, $this->settings->password, $this->options);
+      } catch (\PDOException $e) {
+        $this->logError(__FUNCTION__, $e->getMessage());
+      }
+    } else {
+      throw new \InvalidArgumentException('Database configuration is invalid');
     }
     return $this;
   }

@@ -31,9 +31,9 @@ class Menu
       if (isset($values['submenus'])) {
         $menus[] = self::getItem($alias, $values, true, $select).'<ul>';
         $menus[] = self::render($values['submenus'], $select);
-        $menus[] = '</ul>';
+        $menus[] = '</li></ul>';
       } else {
-        $menus[] = self::getItem($alias, $values, false, $select);
+        $menus[] = self::getItem($alias, $values, false, $select).'</li>';
       }
     }
     return implode('', $menus);

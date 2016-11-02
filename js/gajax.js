@@ -47,6 +47,26 @@ window.$K = (function () {
     var n = parseFloat(val);
     return isNaN(n) ? 0 : n;
   };
+  window.copyToClipboard = function (text) {
+    function selectElementText(element) {
+      if (document.selection) {
+        var range = document.body.createTextRange();
+        range.moveToElementText(element);
+        range.select();
+      } else if (window.getSelection) {
+        var range = document.createRange();
+        range.selectNode(element);
+        window.getSelection().removeAllRanges();
+        window.getSelection().addRange(range);
+      }
+    }
+    var element = document.createElement('div');
+    element.textContent = text;
+    document.body.appendChild(element);
+    selectElementText(element);
+    document.execCommand('copy');
+    element.remove();
+  };
   window.trans = function (val) {
     try {
       var patt = /^[_]+|[_]+$/g;
@@ -382,6 +402,35 @@ window.$K = (function () {
         }
       }
       return GElement(e);
+    },
+    getCaretPosition: function () {
+      if (document.selection) {
+        var range = document.selection.createRange(),
+          textLength = range.text.length;
+        range.moveStart('character', -this.value.length);
+        var caretAt = range.text.length;
+        return {
+          start: caretAt,
+          end: caretAt + textLength
+        };
+      } else if (this.selectionStart || this.selectionStart == '0') {
+        return {
+          start: this.selectionStart,
+          end: this.selectionEnd
+        };
+      }
+    },
+    setCaretPosition: function (start, length) {
+      if (this.setSelectionRange) {
+        this.focus();
+        this.setSelectionRange(start, start + length);
+      } else if (this.createTextRange) {
+        var range = this.createTextRange();
+        range.collapse(true);
+        range.moveEnd('character', start + length);
+        range.moveStart('character', start);
+        range.select();
+      }
     },
     getStyle: function (s) {
       s = (s == 'float' && this.currentStyle) ? 'styleFloat' : s;
@@ -1180,13 +1229,13 @@ window.$K = (function () {
         }
         var autofocus = this.get('autofocus');
         var text = this;
-        if (obj.type == 'date') {
+        if (obj.type == 'date' || obj.type == 'time') {
           var o = {
             'type': 'hidden',
             'name': this.name,
             'id': this.id
           };
-          var txt_date = frm.create('input', o);
+          var hidden = frm.create('input', o);
           text = $G().create('input', {
             'type': 'text'
           });
@@ -1195,28 +1244,39 @@ window.$K = (function () {
           }
           if (obj.disabled) {
             text.disabled = true;
-            txt_date.disabled = true;
+            hidden.disabled = true;
           }
           text.className = this.className;
-          var calendar = new GCalendar(text, function () {
-            txt_date.value = this.getDateFormat('y-m-d');
-            txt_date.callEvent('change');
-          });
-          txt_date.calendar = calendar;
-          if (obj.min) {
-            calendar.minDate(obj.min);
-          }
-          if (obj.max) {
-            calendar.maxDate(obj.max);
-          }
-          txt_date.value = this.value;
-          window.setInterval(function () {
-            if (txt_date.value != calendar.oldDate) {
-              calendar.oldDate = txt_date.value;
-              calendar.setDate(txt_date.value);
+          var src;
+          if (obj.type == 'time') {
+            src = new GTime(text, function () {
+              hidden.value = this.getTime();
+              hidden.callEvent('change');
+            });
+          } else {
+            src = new GCalendar(text, function () {
+              hidden.value = this.getDateFormat('y-m-d');
+              hidden.callEvent('change');
+            });
+            if (obj.min) {
+              src.minDate(obj.min);
             }
-            if (txt_date.disabled != text.disabled) {
-              text.disabled = txt_date.disabled ? true : false;
+            if (obj.max) {
+              src.maxDate(obj.max);
+            }
+          }
+          hidden.value = this.value;
+          window.setInterval(function () {
+            if (hidden.value != src.old) {
+              src.old = hidden.value;
+              if (obj.type == 'time') {
+                src.setTime(hidden.value);
+              } else {
+                src.setDate(hidden.value);
+              }
+            }
+            if (hidden.disabled != text.disabled) {
+              text.disabled = hidden.disabled ? true : false;
             }
           }, 500);
           this.replace(text);
@@ -2710,6 +2770,167 @@ window.$K = (function () {
       return this;
     }
   };
+  window.GTime = GClass.create();
+  GTime.prototype = {
+    initialize: function (id, onchanged) {
+      this.input = $G(id);
+      this.input.addClass('gtime');
+      this.onchanged = onchanged || $K.emptyFunction;
+      this.firstKey = null;
+      this.highlight = '';
+      this.onchanged.call(this);
+      var self = this;
+      var doSetCaret = function () {
+        var caret = self.input.getCaretPosition();
+        self._setCaret(caret.start);
+        self.firstKey = null;
+      };
+      this.input.addEvent('focus', function () {
+        window.setTimeout(doSetCaret, 1);
+      });
+      this.input.addEvent('click', doSetCaret);
+      this.input.addEvent('blur', function () {
+        self.setTime(this.value);
+      });
+      this.input.addEvent('paste', function (e) {
+        GEvent.stop(e);
+        return false;
+      });
+      this.input.addEvent('keydown', function (e) {
+        var key = GEvent.keyCode(e);
+        var stop = false;
+        if (key == 8) {
+          self.input.value = '--:--';
+          self._setCaret(0);
+          self.firstKey = null;
+          stop = true;
+        } else if (key == 37) {
+          self._setCaret(0);
+          self.firstKey = null;
+          stop = true;
+        } else if (key == 38) {
+          var times = self.input.value.split(':');
+          var caret = 0;
+          if (self.highlight == 'hour') {
+            var t = Math.min(23, floatval(times[0]) + 1);
+            if (t < 10) {
+              times[0] = '0' + t;
+            } else {
+              times[0] = t;
+            }
+          } else if (self.highlight == 'minute') {
+            var t = Math.min(59, floatval(times[1]) + 1);
+            if (t < 10) {
+              times[1] = '0' + t;
+            } else {
+              times[1] = t;
+            }
+            caret = 3;
+          }
+          self.input.value = times[0] + ':' + times[1];
+          self._setCaret(caret);
+          stop = true;
+        } else if (key == 39) {
+          self._setCaret(3);
+          self.firstKey = null;
+          stop = true;
+        } else if (key == 40) {
+          var times = self.input.value.split(':');
+          var caret = 0;
+          if (self.highlight == 'hour') {
+            var t = Math.max(0, floatval(times[0]) - 1);
+            if (t < 10) {
+              times[0] = '0' + t;
+            } else {
+              times[0] = t;
+            }
+          } else if (self.highlight == 'minute') {
+            var t = Math.max(0, floatval(times[1]) - 1);
+            if (t < 10) {
+              times[1] = '0' + t;
+            } else {
+              times[1] = t;
+            }
+            caret = 3;
+          }
+          self.input.value = times[0] + ':' + times[1];
+          self._setCaret(caret);
+          stop = true;
+        }
+        if (stop) {
+          GEvent.stop(e);
+          return false;
+        }
+      });
+      this.input.addEvent('keypress', function (e) {
+        var key = GEvent.keyCode(e);
+        if (key == 9) {
+          return true;
+        } else if (key >= 48 && key <= 57 && !GEvent.isCtrlKey(e)) {
+          var c = floatval(String.fromCharCode(key));
+          var times = self.input.value.split(':');
+          var caret = 0;
+          if (self.highlight == 'hour') {
+            if (self.firstKey == null) {
+              times[0] = '0' + c;
+              if (c < 3) {
+                self.firstKey = c;
+                caret = 0;
+              } else {
+                caret = 3;
+                self.firstKey = null;
+              }
+            } else {
+              times[0] = String(self.firstKey) + c;
+              caret = 3;
+              self.firstKey = null;
+            }
+          } else if (self.highlight == 'minute') {
+            if (self.firstKey == null) {
+              times[1] = '0' + c;
+              if (c < 6) {
+                self.firstKey = c;
+              }
+            } else {
+              times[1] = String(self.firstKey) + c;
+              self.firstKey = null;
+            }
+            caret = 3;
+          }
+          self.input.value = times[0] + ':' + times[1];
+          self._setCaret(caret);
+        }
+        GEvent.stop(e);
+        return false;
+      });
+    },
+    getTime: function () {
+      return this.input.value == '--:--' ? '' : this.input.value + ':00';
+    },
+    setTime: function (time) {
+      this.input.value = this._toTime(time);
+      this.onchanged.call(this);
+      return this;
+    },
+    _toTime: function (time) {
+      time = /([0-9]{1,2})(:([0-9]{1,2}))?(:([0-9]{1,2}))?/.exec(time);
+      if (time) {
+        var h = Math.min(23, floatval(time[1]));
+        var m = Math.min(59, floatval(time[3]));
+        return  (h < 10 ? '0' + h : h) + ':' + (m < 10 ? '0' + m : m);
+      }
+      return '--:--';
+    },
+    _setCaret: function (pos) {
+      if (pos < 3) {
+        this.input.setCaretPosition(0, 2);
+        this.highlight = 'hour';
+      } else {
+        this.input.setCaretPosition(3, 2);
+        this.highlight = 'minute';
+      }
+    }
+  };
   window.GCalendar = GClass.create();
   GCalendar.prototype = {
     initialize: function (id, onchanged) {
@@ -2732,7 +2953,7 @@ window.$K = (function () {
       this.calendar.style.position = 'absolute';
       this.calendar.style.display = 'none';
       this.calendar.style.zIndex = 1001;
-      this._datechanged();
+      this._dochanged();
       var self = this;
       this.input.addEvent('click', function (e) {
         self.mode = 0;
@@ -2770,7 +2991,7 @@ window.$K = (function () {
         self.calendar.style.display = 'none';
       });
     },
-    _datechanged: function () {
+    _dochanged: function () {
       if (this.xdate && this.date > this.xdate) {
         this.date.setTime(this.xdate.valueOf());
       } else if (this.mdate && this.date < this.mdate) {
@@ -2980,7 +3201,7 @@ window.$K = (function () {
           if (canclick) {
             $G(cell).addEvent('click', function (e) {
               self.date.setTime(this.oDate.valueOf());
-              self._datechanged();
+              self._dochanged();
               var input = $E(self.input);
               input.focus();
               input.select();
@@ -3027,27 +3248,27 @@ window.$K = (function () {
     },
     moveDate: function (day) {
       this.date.setDate(this.date.getDate() + day);
-      this._datechanged();
+      this._dochanged();
       return this;
     },
     moveMonth: function (month) {
       this.date.setMonth(this.date.getMonth() + month);
-      this._datechanged();
+      this._dochanged();
       return this;
     },
     moveYear: function (year) {
       this.date.setFullYear(this.date.getFullYear() + year);
-      this._datechanged();
+      this._dochanged();
       return this;
     },
     setFormat: function (value) {
       this.format = value;
-      this._datechanged();
+      this._dochanged();
       return this;
     },
     setDate: function (date) {
       this.date = this._toDate(date);
-      this._datechanged();
+      this._dochanged();
       return this;
     },
     getDate: function () {
@@ -3214,9 +3435,8 @@ window.$K = (function () {
       };
       var _validateColor = function (e) {
         var key = GEvent.keyCode(e);
-        var ctrl = GEvent.isCtrlKey(e);
-        if (!((key > 36 && key < 41) || key == 8 || key == 9 || ctrl)) {
-          var c = new String.fromCharCode(key);
+        if (!((key > 36 && key < 41) || key == 8 || key == 9 || GEvent.isCtrlKey(e))) {
+          var c = String.fromCharCode(key);
           var numcheck = /[\#0-9a-fA-F]/;
           if (!numcheck.test(c)) {
             GEvent.stop(e);

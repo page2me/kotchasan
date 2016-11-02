@@ -8,8 +8,6 @@
 
 namespace Kotchasan\Database;
 
-use \Kotchasan\Database;
-use \Kotchasan\Database\Driver;
 use \Kotchasan\ArrayTool;
 
 /**
@@ -19,40 +17,14 @@ use \Kotchasan\ArrayTool;
  *
  * @since 1.0
  */
-abstract class Query extends \Kotchasan\KBase
+abstract class Query extends \Kotchasan\Database\Db
 {
-  /**
-   * database connection
-   *
-   * @var Driver
-   */
-  protected $db;
   /**
    * ตัวแปรเก็บคำสั่ง SQL
    *
    * @var array
    */
   protected $sqls;
-
-  /**
-   * Class constructor
-   *
-   * @param string $conn ชื่อของการเชื่อมต่อ ถ้าไม่ระบุจะไม่มีการเชื่อมต่อ database
-   */
-  public function __construct($conn)
-  {
-    $this->db = Database::create($conn);
-  }
-
-  /**
-   * อ่าน database connection
-   *
-   * @return Driver
-   */
-  public function db()
-  {
-    return $this->db;
-  }
 
   /**
    * ฟังก์ชั่นสร้าง SQL สำหรับหาค่าสูงสุด + 1
@@ -67,19 +39,6 @@ abstract class Query extends \Kotchasan\KBase
   public function buildNext($field, $table, $condition = null, $alias = null)
   {
     return $this->db->buildNext($field, $this->getFullTableName($table), $condition, $alias);
-  }
-
-  /**
-   * อ่านค่ากำหนดของฐานข้อมูล
-   *
-   * @param string $key
-   * @return mixed
-   */
-  public function getSetting($key)
-  {
-    if (isset($this->db->settings->$key)) {
-      return $this->db->settings->$key;
-    }
   }
 
   /**

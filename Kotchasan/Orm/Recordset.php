@@ -47,18 +47,6 @@ class Recordset extends Query implements \Iterator
    */
   private $perPage;
   /**
-   * ชื่อรองของตาราง
-   *
-   * @var string
-   */
-  private $table_alias;
-  /**
-   * ชื่อตาราง
-   *
-   * @var string
-   */
-  private $table_name;
-  /**
    * กำหนดผลลัพท์ของ Recordset
    * true ผลลัพท์เป็น Array
    * false ผลลัพท์เป็น Model
@@ -90,7 +78,7 @@ class Recordset extends Query implements \Iterator
     parent::__construct($this->field->getConn());
     $this->sqls = array();
     $this->values = array();
-    $this->initTableName($this->field->getTable());
+    $this->field->initTableName($this->db);
     if (method_exists($this->field, 'getConfig')) {
       $result = $this->field->getConfig();
       foreach ($result as $key => $value) {
@@ -140,7 +128,7 @@ class Recordset extends Query implements \Iterator
    */
   public function createQuery($start, $count)
   {
-    $this->sqls['from'] = $this->tableWithAlias();
+    $this->sqls['from'] = $this->field->getTableWithAlias();
     if (!empty($start) || !empty($count)) {
       $this->sqls['limit'] = $count;
       $this->sqls['start'] = $start;
@@ -210,7 +198,7 @@ class Recordset extends Query implements \Iterator
   {
     $ret = $this->buildWhereValues($condition, $oprator, $this->field->getPrimarykey());
     $sqls = array(
-      'delete' => $this->table_name,
+      'delete' => $this->field->table_name,
       'where' => $ret[0]
     );
     if (!$all) {
@@ -258,7 +246,7 @@ class Recordset extends Query implements \Iterator
       $field = $match[1];
     }
     $rs = new Recordset($field);
-    $table = $rs->tableWithAlias(isset($match[4]) ? $match[4] : null);
+    $table = $rs->field->getTableWithAlias(isset($match[4]) ? $match[4] : null);
     $ret = $rs->buildJoin($table, $type, $on);
     if (is_array($ret)) {
       $this->sqls['join'][] = $ret[0];
@@ -313,7 +301,7 @@ class Recordset extends Query implements \Iterator
   public function first($fields = null)
   {
     $sqls = array(
-      'from' => $this->tableWithAlias(),
+      'from' => $this->field->getTableWithAlias(),
       'limit' => 1
     );
     if (!empty($fields)) {
@@ -362,7 +350,7 @@ class Recordset extends Query implements \Iterator
   public function fieldExists($field)
   {
     if (empty($this->fields)) {
-      $this->fields = Schema::create($this->db())->fields($this->table_name);
+      $this->fields = Schema::create($this->db())->fields($this->field->table_name);
     }
     return in_array($field, $this->fields);
   }
@@ -387,35 +375,6 @@ class Recordset extends Query implements \Iterator
   }
 
   /**
-   * ฟังก์ชั่นตรวจสอบชื่อตารางและชื่อรอง
-   */
-  private function initTableName($table)
-  {
-    if (empty($table)) {
-      $class = get_called_class();
-      if (preg_match('/[a-z0-9]+\\\\([a-z0-9_]+)\\\\Model/i', $class, $match)) {
-        $t = strtolower($match[1]);
-      } elseif (preg_match('/Models\\\\([a-z0-9_]+)/i', $class, $match)) {
-        $t = strtolower($match[1]);
-      } else {
-        $t = strtolower($class);
-      }
-      $this->table_name = $this->getFullTableName($t);
-      $this->table_alias = $t;
-    } elseif (preg_match('/([a-z0-9A-Z_]+)(\s+(as|AS))?\s+([A-Z0-9]{1,2})/', $table, $match)) {
-      $this->table_name = $this->getFullTableName($match[1]);
-      $this->table_alias = $match[4];
-    } elseif (preg_match('/([a-z0-9A-Z_]+)(\s+(as|AS))?\s+([a-zA-Z0-9]{1,2})/', $table, $match)) {
-      $this->table_name = $this->getFullTableName($match[1]);
-      $this->table_alias = $match[4];
-    } else {
-      // ใช้ชื่อตารางเป็นชื่อรอง
-      $this->table_name = $this->getFullTableName($table);
-      $this->table_alias = $table;
-    }
-  }
-
-  /**
    * insert ข้อมูล
    *
    * @param Field $field
@@ -424,7 +383,7 @@ class Recordset extends Query implements \Iterator
   public function insert(Field $field)
   {
     $save = array();
-    foreach (Schema::create($this->db())->fields($this->table_name) as $item) {
+    foreach (Schema::create($this->db())->fields($this->field->table_name) as $item) {
       if (isset($field->$item)) {
         $save[$item] = $field->$item;
       }
@@ -432,7 +391,7 @@ class Recordset extends Query implements \Iterator
     if (empty($save)) {
       $result = false;
     } else {
-      $result = $this->db()->insert($this->table_name, $save);
+      $result = $this->db()->insert($this->field->table_name, $save);
     }
     return $result;
   }
@@ -505,26 +464,6 @@ class Recordset extends Query implements \Iterator
   }
 
   /**
-   * ฟังก์ชั่นอ่านชื่อตาราง
-   *
-   * @return string
-   */
-  public function tableName()
-  {
-    return $this->table_name;
-  }
-
-  /**
-   * ฟังก์ชั่นอ่านชื่อตารางและชื่อรอง
-   *
-   * @return string
-   */
-  public function tableWithAlias($alias = null)
-  {
-    return $this->table_name.' AS '.(empty($alias) ? $this->table_alias : $alias);
-  }
-
-  /**
    * จำกัดจำนวนผลลัพท์
    * LIMIT $start, $count
    *
@@ -564,7 +503,7 @@ class Recordset extends Query implements \Iterator
    */
   public function emptyTable()
   {
-    return $this->db()->emptyTable($this->table_name);
+    return $this->db()->emptyTable($this->field->table_name);
   }
 
   /**
@@ -580,13 +519,13 @@ class Recordset extends Query implements \Iterator
     $schema = Schema::create($db);
     $datas = array();
     if ($save instanceof Field) {
-      foreach ($schema->fields($this->table_name) as $field) {
+      foreach ($schema->fields($this->field->table_name) as $field) {
         if (isset($save->$field)) {
           $datas[$field] = $save->$field;
         }
       }
     } else {
-      foreach ($schema->fields($this->table_name) as $field) {
+      foreach ($schema->fields($this->field->table_name) as $field) {
         if (isset($save[$field])) {
           $datas[$field] = $save[$field];
         }
@@ -595,7 +534,7 @@ class Recordset extends Query implements \Iterator
     if (empty($datas)) {
       $result = false;
     } else {
-      $result = $db->update($this->table_name, $condition, $datas);
+      $result = $db->update($this->field->table_name, $condition, $datas);
       if ($db->cacheGetAction() == 1) {
         $db->cacheSave($datas);
       }
@@ -612,7 +551,7 @@ class Recordset extends Query implements \Iterator
    */
   public function updateAll($save)
   {
-    return $this->db()->updateAll($this->table_name, $save);
+    return $this->db()->updateAll($this->field->table_name, $save);
   }
 
   /**
@@ -630,7 +569,7 @@ class Recordset extends Query implements \Iterator
   public function where($where = array(), $oprator = 'AND')
   {
     if (is_int($where) || (is_string($where) && $where != '') || (is_array($where) && !empty($where))) {
-      $where = $this->buildWhere($where, $oprator, $this->table_alias.'.'.$this->field->getPrimarykey());
+      $where = $this->buildWhere($where, $oprator, $this->field->table_alias.'.'.$this->field->getPrimarykey());
       if (is_array($where)) {
         $this->values = ArrayTool::replace($this->values, $where[1]);
         $where = $where[0];

@@ -89,13 +89,23 @@ class Html extends \Kotchasan\KBase
   {
     $tag = strtolower($tag);
     if ($tag == 'groups' || $tag == 'groups-table') {
+      $prop = array('class' => isset($attributes['class']) ? $attributes['class'] : 'item');
+      if (isset($attributes['id'])) {
+        $prop['id'] = $attributes['id'];
+      }
       if (isset($attributes['label'])) {
-        $item = self::fieldset(array(
-            'class' => 'item',
-            'title' => $attributes['label']
-        ));
+        if (isset($attributes['for'])) {
+          $item = new static('div', $prop);
+          $item->add('label', array(
+            'innerHTML' => $attributes['label'],
+            'for' => $attributes['for']
+          ));
+        } else {
+          $prop['title'] = $attributes['label'];
+          $item = self::fieldset($prop);
+        }
       } else {
-        $item = new static('div', array('class' => 'item'));
+        $item = new static('div', $prop);
       }
       $this->rows[] = $item;
       $obj = $item->add('div', array('class' => 'input-'.$tag));
@@ -127,10 +137,17 @@ class Html extends \Kotchasan\KBase
       if (isset($attributes['comment'])) {
         $item->add('div', $comment);
       }
-    } elseif ($tag == 'radiogroups' || $tag == 'checkboxgroups') {
+    } elseif ($tag == 'row') {
       $obj = new static('div', array(
-        'class' => 'item'
+        'class' => 'row'
       ));
+      $this->rows[] = $obj;
+    } elseif ($tag == 'radiogroups' || $tag == 'checkboxgroups') {
+      $prop = array('class' => 'item');
+      if (!empty($attributes['itemId'])) {
+        $prop['id'] = $attributes['itemId'];
+      }
+      $obj = new static('div', $prop);
       $this->rows[] = $obj;
       if (isset($attributes['name'])) {
         $name = $attributes['name'];
@@ -148,29 +165,35 @@ class Html extends \Kotchasan\KBase
       $div = $obj->add('div', array(
         'class' => $tag.(isset($attributes['labelClass']) ? ' '.$attributes['labelClass'] : '').(empty($attributes['multiline']) ? '' : ' multiline')
       ));
-      foreach ($attributes['options'] as $v => $label) {
-        if (is_array($attributes['value'])) {
-          $checked = isset($attributes['value']) && in_array($v, $attributes['value']);
-        } else {
-          $checked = isset($attributes['value']) && $v == $attributes['value'];
+      if (!empty($attributes['options']) && is_array($attributes['options'])) {
+        foreach ($attributes['options'] as $v => $label) {
+          if (isset($attributes['value'])) {
+            if (is_array($attributes['value'])) {
+              $checked = isset($attributes['value']) && in_array($v, $attributes['value']);
+            } else {
+              $checked = isset($attributes['value']) && $v == $attributes['value'];
+            }
+          } else {
+            $checked = false;
+          }
+          $item = array(
+            'label' => $label,
+            'value' => $v,
+            'checked' => $checked
+          );
+          if ($name) {
+            $item['name'] = $name;
+          }
+          if (isset($attributes['id'])) {
+            $item['id'] = $attributes['id'];
+            $result_id = $attributes['id'];
+            unset($attributes['id']);
+          }
+          if (isset($attributes['comment'])) {
+            $item['title'] = $attributes['comment'];
+          }
+          $div->add($tag == 'radiogroups' ? 'radio' : 'checkbox', $item);
         }
-        $item = array(
-          'label' => $label,
-          'value' => $v,
-          'checked' => $checked
-        );
-        if ($name) {
-          $item['name'] = $name;
-        }
-        if (isset($attributes['id'])) {
-          $item['id'] = $attributes['id'];
-          $result_id = $attributes['id'];
-          unset($attributes['id']);
-        }
-        if (isset($attributes['comment'])) {
-          $item['title'] = $attributes['comment'];
-        }
-        $div->add($tag == 'radiogroups' ? 'radio' : 'checkbox', $item);
       }
       if (!empty($attributes['comment'])) {
         $obj->add('div', array(
@@ -270,11 +293,11 @@ class Html extends \Kotchasan\KBase
           $prop['action'] = $action;
         }
       }
-      $script .=')';
+      $script .= ')';
       if (isset($onsubmit)) {
         $script .= '.onsubmit('.$onsubmit.')';
       }
-      $script .=';';
+      $script .= ';';
       $form_inputs = Form::get2Input();
     } else {
       if (isset($action)) {

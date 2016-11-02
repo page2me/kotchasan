@@ -137,8 +137,12 @@ class Date
   {
     if (empty($time)) {
       $time = time();
-    } elseif (is_string($time) && preg_match('/([0-9]+){1,4}-([0-9]+){1,2}-([0-9]+){1,2}(\s([0-9]+){1,2}:([0-9]+){1,2}:([0-9]+){1,2})?/', $time, $match)) {
-      $time = mktime(empty($match[5]) ? 0 : (int)$match[5], empty($match[6]) ? 0 : (int)$match[6], empty($match[7]) ? 0 : (int)$match[7], (int)$match[2], (int)$match[3], (int)$match[1]);
+    } elseif (is_string($time)) {
+      if (preg_match('/([0-9]+){1,4}-([0-9]+){1,2}-([0-9]+){1,2}(\s([0-9]+){1,2}:([0-9]+){1,2}:([0-9]+){1,2})?/', $time, $match)) {
+        $time = mktime(empty($match[5]) ? 0 : (int)$match[5], empty($match[6]) ? 0 : (int)$match[6], empty($match[7]) ? 0 : (int)$match[7], (int)$match[2], (int)$match[3], (int)$match[1]);
+      } elseif (preg_match('/([0-9]+){1,2}:([0-9]+){1,2}:([0-9]+){1,2}/', $time, $match)) {
+        $time = mktime((int)$match[1], (int)$match[2], (int)$match[3]);
+      }
     }
     // create class
     if (!isset(self::$lang)) {
@@ -186,18 +190,42 @@ class Date
   }
 
   /**
-   * ฟังก์ชั่น คำนวนความแตกต่างของวัน (อายุ)
+   * ฟังก์ชั่น คำนวนความแตกต่างของวัน (เช่น อายุ)
    *
-   * @param int $start_date วันที่เริ่มต้นหรือวันเกิด (Unix timestamp)
-   * @param int $end_date วันที่สิ้นสุดหรือวันนี้ (Unix timestamp)
-   * @return array คืนค่า ปี เดือน วัน [year, month, day] ที่แตกต่าง
-   * @assert (mktime(0, 0, 0, 2, 1, 2016), mktime(0, 0, 0, 3, 1, 2016)) [==]  array('year' => 0,'month' => 1, 'day' => 0)
+   * @param string|int $begin_date วันที่เริ่มต้นหรือวันเกิด (Unix timestamp หรือ วันที่ รูปแบบ YYYY-m-d)
+   * @param istring|int $end_date วันที่สิ้นสุดหรือวันนี้ (Unix timestamp หรือ วันที่ รูปแบบ YYYY-m-d)
+   * @return array คืนค่า จำนวนวัน(ติดลบได้) ปี เดือน วัน [days, year, month, day] ที่แตกต่าง
+   * @assert (mktime(0, 0, 0, 2, 1, 2016), mktime(0, 0, 0, 3, 1, 2016)) [==]  array('days' => 29, 'year' => 0,'month' => 1, 'day' => 0)
+   * @assert ('2016-3-1', '2016-2-1') [==]  array('days' => -29, 'year' => 0,'month' => 1, 'day' => 0)
    */
-  public static function compare($start_date, $end_date)
+  public static function compare($begin_date, $end_date)
   {
-    $Year1 = (int)date("Y", $start_date);
-    $Month1 = (int)date("m", $start_date);
-    $Day1 = (int)date("d", $start_date);
+    if (is_string($begin_date) && preg_match('/([0-9]{1,4})-([0-9]{1,2})-([0-9]{1,2})(\s([0-9]{1,2}):([0-9]{1,2}):([0-9]{1,2}))?/', $begin_date, $match)) {
+      $begin_date = mktime(0, 0, 0, (int)$match[2], (int)$match[3], (int)$match[1]);
+    }
+    if (is_string($end_date) && preg_match('/([0-9]{1,4})-([0-9]{1,2})-([0-9]{1,2})(\s([0-9]{1,2}):([0-9]{1,2}):([0-9]{1,2}))?/', $end_date, $match)) {
+      $end_date = mktime(0, 0, 0, (int)$match[2], (int)$match[3], (int)$match[1]);
+    }
+    if ($end_date == $begin_date) {
+      // เท่ากัน
+      return array(
+        'days' => 0,
+        'year' => 0,
+        'month' => 0,
+        'day' => 0
+      );
+    } else {
+      // จำนวนวันที่แตกต่าง
+      $days = floor(($end_date - $begin_date) / 86400);
+      if ($end_date < $begin_date) {
+        $tmp = $begin_date;
+        $begin_date = $end_date;
+        $end_date = $tmp;
+      }
+    }
+    $Year1 = (int)date("Y", $begin_date);
+    $Month1 = (int)date("m", $begin_date);
+    $Day1 = (int)date("d", $begin_date);
     $Year2 = (int)date("Y", $end_date);
     $Month2 = (int)date("m", $end_date);
     $Day2 = (int)date("d", $end_date);
@@ -211,25 +239,37 @@ class Date
     if ((($Year2 % 100) == 0) & (($Year2 % 400) != 0)) {
       $months[2] = 28;
     }
-    // คำนวนจำนวนวันแตกต่าง
-    $YearDiff = $Year2 - $Year1;
-    if ($Month2 >= $Month1) {
-      $MonthDiff = $Month2 - $Month1;
+    if (abs($days) < $months[$Month1]) {
+      // ไม่เกิน 1 เดือน
+      return array(
+        'days' => $days,
+        'year' => 0,
+        'month' => 0,
+        'day' => abs($days)
+      );
     } else {
-      $YearDiff--;
-      $MonthDiff = 12 + $Month2 - $Month1;
+      // ห่างกันเกิน 1 เดือน
+      $YearDiff = $Year2 - $Year1;
+      if ($Month2 >= $Month1) {
+        $MonthDiff = $Month2 - $Month1;
+      } else {
+        $YearDiff--;
+        $MonthDiff = 12 + $Month2 - $Month1;
+      }
+      if ($Day1 > $months[$Month2]) {
+        $Day1 = 0;
+      } elseif ($Day1 > $Day2) {
+        $Month2 = $Month2 == 1 ? 13 : $Month2;
+        $Day2 += $months[$Month2 - 1];
+        $MonthDiff--;
+      }
+      return array(
+        'days' => $days,
+        'year' => $YearDiff,
+        'month' => $MonthDiff,
+        'day' => $Day2 - $Day1
+      );
     }
-    if ($Day1 > $months[$Month2]) {
-      $Day1 = 0;
-    } elseif ($Day1 > $Day2) {
-      $Month2 = $Month2 == 1 ? 13 : $Month2;
-      $Day2 += $months[$Month2 - 1];
-      $MonthDiff--;
-    }
-    $ret['year'] = $YearDiff;
-    $ret['month'] = $MonthDiff;
-    $ret['day'] = $Day2 - $Day1;
-    return $ret;
   }
 
   /**
@@ -249,6 +289,7 @@ class Date
    *
    * @param int $mktime เวลารูปแบบ Unix timestamp, ไม่ระบุ เป็นวันนี้
    * @return string คืนค่า วันที่และเวลาของ mysql เช่น Y-m-d H:i:s
+   * @assert (1454259600) [==] '2016-02-01 00:00:00'
    */
   public static function mktimeToSqlDateTime($mktime = 0)
   {
@@ -260,11 +301,11 @@ class Date
    *
    * @param string $date วันที่ในรูปแบบ Y-m-d H:i:s
    * @return int คืนค่าเวลาในรูป mktime
-   * @assert (\Kotchasan\Date::mktimeToSqlDateTime(1453522271)) [==] 1453522271
+   * @assert ('2016-02-01 00:00:00') [==] 1454259600
    */
   public static function sqlDateTimeToMktime($date)
   {
-    if (preg_match('/([0-9]+){1,4}-([0-9]+){1,2}-([0-9]+){1,2}(\s([0-9]+){1,2}:([0-9]+){1,2}:([0-9]+){1,2})?/', $date, $match)) {
+    if (preg_match('/([0-9]{1,4})-([0-9]{1,2})-([0-9]{1,2})(\s([0-9]{1,2}):([0-9]{1,2}):([0-9]{1,2}))?/', $date, $match)) {
       return mktime(isset($match[5]) ? (int)$match[5] : 0, isset($match[6]) ? (int)$match[6] : 0, isset($match[7]) ? (int)$match[7] : 0, (int)$match[2], (int)$match[3], (int)$match[1]);
     }
     return 0;

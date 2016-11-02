@@ -74,9 +74,11 @@ class Form extends \Kotchasan\KBase
     foreach ($this->attributes as $k => $v) {
       switch ($k) {
         case 'itemClass':
+        case 'itemId':
         case 'labelClass':
         case 'label':
         case 'comment':
+        case 'unit':
         case 'value':
         case 'dataPreview':
         case 'previewSrc':
@@ -133,7 +135,7 @@ class Form extends \Kotchasan\KBase
       foreach ($event as $on => $func) {
         $this->javascript[] = '$G("'.$id.'").addEvent("'.$on.'", '.$func.');';
       }
-    } elseif (!Html::$form->gform) {
+    } elseif (isset(Html::$form) && !Html::$form->gform) {
       foreach ($event as $on => $func) {
         $prop['on'.$on] = 'on'.$on.'="'.$func.'()"';
       }
@@ -203,7 +205,7 @@ class Form extends \Kotchasan\KBase
       $element = Antispam::createImage($antispamid, true).$element;
     }
     if (empty($itemClass)) {
-      $input = empty($comment) ? '' : '<div class="item">';
+      $input = empty($comment) ? '' : '<div class="item"'.(empty($itemId) ? '' : ' id="'.$itemId.'"').'>';
       if (empty($labelClass) && empty($label)) {
         $input .= $element;
       } elseif (isset($type) && ($type === 'checkbox' || $type === 'radio')) {
@@ -215,7 +217,8 @@ class Form extends \Kotchasan\KBase
         $input .= '<div class="comment"'.(empty($id) ? '' : ' id="result_'.$id.'"').'>'.$comment.'</div></div>';
       }
     } else {
-      $input = '<div class="'.$itemClass.'">';
+      $itemClass .= isset($unit) ? ' wlabel' : '';
+      $input = '<div class="'.$itemClass.'"'.(empty($itemId) ? '' : ' id="'.$itemId.'"').'>';
       if (isset($type) && $type === 'checkbox') {
         $input .= '<label'.(empty($labelClass) ? '' : ' class="'.$labelClass.'"').'>'.$element.'&nbsp;'.$label.'</label>';
       } else {
@@ -226,6 +229,9 @@ class Form extends \Kotchasan\KBase
           $input .= '<label for="'.$id.'">'.$label.'</label>';
         }
         $input .= '<span'.(empty($labelClass) ? '' : ' class="'.$labelClass.'"').'>'.$element.'</span>';
+        if (isset($unit)) {
+          $input .= '<span class=label>'.$unit.'</span>';
+        }
       }
       if (!empty($comment)) {
         $input .= '<div class="comment"'.(empty($id) ? '' : ' id="result_'.$id.'"').'>'.$comment.'</div>';
@@ -314,6 +320,15 @@ class Form extends \Kotchasan\KBase
     $obj = new static;
     $obj->tag = 'input';
     $attributes['type'] = 'date';
+    $obj->attributes = $attributes;
+    return $obj;
+  }
+
+  public static function time($attributes = array())
+  {
+    $obj = new static;
+    $obj->tag = 'input';
+    $attributes['type'] = 'time';
     $obj->attributes = $attributes;
     return $obj;
   }

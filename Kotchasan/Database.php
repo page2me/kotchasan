@@ -34,6 +34,7 @@ final class Database
   {
     $param = (object)array(
         'settings' => (object)array(
+          'driver' => 'PdoMysql',
           'char_set' => 'utf8',
           'dbdriver' => 'mysql',
           'hostname' => 'localhost'
@@ -68,8 +69,8 @@ final class Database
       // โหลด driver (base)
       require_once VENDOR_DIR.'Database/Driver.php';
       // โหลด driver ตาม config ถ้าไม่พบ ใช้ PdoMysqlDriver
-      if (is_file(VENDOR_DIR.'Database/'.$param->settings->dbdriver.'Driver.php')) {
-        $class = ucfirst($param->settings->dbdriver).'Driver';
+      if (is_file(VENDOR_DIR.'Database/'.$param->settings->driver.'Driver.php')) {
+        $class = $param->settings->driver.'Driver';
       } else {
         // default driver
         $class = 'PdoMysqlDriver';
