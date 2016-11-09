@@ -535,7 +535,7 @@ abstract class Query extends \Kotchasan\Database\Db
         foreach ($value as $i => $item) {
           if (empty($item)) {
             $qs[] = is_string($item) ? "'$item'" : $item;
-          } elseif (is_string($item) && preg_match('/([a-zA-Z0-9]{1,2})\.`?([a-zA-Z0-9_\-]+)`?/', $item, $match)) {
+          } elseif (is_string($item) && preg_match('/^([a-zA-Z0-9]{1,2})\.`?([a-zA-Z0-9_\-]+)`?$/', $item, $match)) {
             $qs[] = "$match[1].`$match[2]`";
           } else {
             $qs[] = $q.$i;

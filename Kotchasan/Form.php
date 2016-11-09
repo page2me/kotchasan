@@ -118,26 +118,28 @@ class Form extends \Kotchasan\KBase
       $name = $id;
       $prop['name'] = 'name="'.$name.'"';
     }
-    if (isset($id) && Html::$form->gform) {
-      if (isset($validator)) {
-        $js = array();
-        $js[] = '"'.$id.'"';
-        $js[] = '"'.$validator[0].'"';
-        $js[] = $validator[1];
-        if (isset($validator[2])) {
-          $js[] = '"'.$validator[2].'"';
-          $js[] = empty($validator[3]) || $validator[3] === null ? 'null' : '"'.$validator[3].'"';
-          $js[] = '"'.Html::$form->attributes['id'].'"';
+    if (isset(Html::$form)) {
+      if (isset($id) && Html::$form->gform) {
+        if (isset($validator)) {
+          $js = array();
+          $js[] = '"'.$id.'"';
+          $js[] = '"'.$validator[0].'"';
+          $js[] = $validator[1];
+          if (isset($validator[2])) {
+            $js[] = '"'.$validator[2].'"';
+            $js[] = empty($validator[3]) || $validator[3] === null ? 'null' : '"'.$validator[3].'"';
+            $js[] = '"'.Html::$form->attributes['id'].'"';
+          }
+          $this->javascript[] = 'new GValidator('.implode(', ', $js).');';
+          unset($validator);
         }
-        $this->javascript[] = 'new GValidator('.implode(', ', $js).');';
-        unset($validator);
-      }
-      foreach ($event as $on => $func) {
-        $this->javascript[] = '$G("'.$id.'").addEvent("'.$on.'", '.$func.');';
-      }
-    } elseif (isset(Html::$form) && !Html::$form->gform) {
-      foreach ($event as $on => $func) {
-        $prop['on'.$on] = 'on'.$on.'="'.$func.'()"';
+        foreach ($event as $on => $func) {
+          $this->javascript[] = '$G("'.$id.'").addEvent("'.$on.'", '.$func.');';
+        }
+      } elseif (!Html::$form->gform) {
+        foreach ($event as $on => $func) {
+          $prop['on'.$on] = 'on'.$on.'="'.$func.'()"';
+        }
       }
     }
     if ($this->tag == 'select') {

@@ -326,6 +326,17 @@ class Html extends \Kotchasan\KBase
   }
 
   /**
+   * create Table
+   *
+   * @param array $attributes
+   * @return HtmlTable
+   */
+  public static function table($attributes = array())
+  {
+    return HtmlTable::create($attributes);
+  }
+
+  /**
    * กำหนด Javascript
    *
    * @param string $script

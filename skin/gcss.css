@@ -1629,9 +1629,6 @@ html[dir="rtl"] .tab > ul > li:first-child > a {
   transition: all 0.2s ease-in-out;
 }
 .gtab > .tab_content {
-  padding: 5px 10px;
-  background-color: #FFF;
-  overflow: hidden;
   clear: both;
 }
 .gtab > .tab_content > .item,
