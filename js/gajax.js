@@ -1411,18 +1411,16 @@ window.$K = (function () {
               this.element.addClass('required').highlight().focus();
               ret = false;
               return true;
-            } else if (this.pattern !== null && val !== '') {
-              if (this.pattern.test(val)) {
-                this.element.valid();
-              } else {
-                title = this.title !== '' ? this.title : trans('Invalid data');
-                this.element.invalid(title);
-                alert(title);
-                this.element.highlight().focus();
-                this.element.select();
-                ret = false;
-                return true;
-              }
+            } else if (this.pattern !== null && val !== '' && !this.pattern.test(val)) {
+              title = this.title !== '' ? this.title : trans('Invalid data');
+              this.element.invalid(title);
+              alert(title);
+              this.element.highlight().focus();
+              this.element.select();
+              ret = false;
+              return true;
+            } else {
+              this.element.reset();
             }
           });
           if (ret && Object.isFunction(temp.callback)) {
@@ -1643,7 +1641,7 @@ window.$K = (function () {
         self.div.style.display = 'block';
         var dm = self.body.getDimensions();
         var hOffset = dm.height - self.body.getClientHeight() + parseInt(self.body.getStyle('marginTop')) + parseInt(self.body.getStyle('marginBottom')) + 40;
-        var wOffset = dm.width - self.body.getClientWidth() + parseInt(self.body.getStyle('marginLeft')) + parseInt(self.body.getStyle('marginRight')) + 30;
+        var wOffset = dm.width - self.body.getClientWidth() + parseInt(self.body.getStyle('marginLeft')) + parseInt(self.body.getStyle('marginRight')) + 20;
         var h = document.viewport.getHeight() - hOffset;
         if (dm.height > h) {
           self.body.style.height = h + 'px';
@@ -2315,7 +2313,7 @@ window.$K = (function () {
     },
     validate: function () {
       this.abort();
-      var ret = Object.isFunction(this.validtor) ? this.validtor.call(this) : true;
+      var ret = Object.isFunction(this.validtor) ? this.validtor.call(this.input) : true;
       if (this.form && ret && this.action && ret !== '' && this.action !== '') {
         this.input.addClass('wait');
         var temp = this;

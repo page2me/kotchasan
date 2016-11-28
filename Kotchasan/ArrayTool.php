@@ -61,24 +61,77 @@ class ArrayTool
    * เลือกรายการ array ที่มีข้อมูลที่กำหนด
    *
    * @param array $array
-   * @param string $where ข้อมูลที่ต้องการ
+   * @param string $search ข้อมูลที่ต้องการ
    * @return array
    *
    * @assert (array('one', 'One', 'two'), 'one') [==] array('one', 'One')
    */
-  public static function filter($array, $where)
+  public static function filter($array, $search)
   {
-    if ($where == '') {
+    if ($search == '') {
       return $array;
     } else {
       $result = array();
       foreach ($array as $key => $value) {
-        if (stripos(self::toString(' ', $value), $where) !== false) {
+        if (stripos(self::toString(' ', $value), $search) !== false) {
           $result[$key] = $value;
         }
       }
       return $result;
     }
+  }
+
+  /**
+   * คืนค่ารายการที่มีคอลัมน์ตามที่กำหนด
+   *
+   * @param array $array
+   * @param string $column_key ชื่อคอลัมน์ที่ต้องการ
+   * @param mixed $index_key null คืนค่า index ของ $array, string คืนค่า index จากคอลัมน์ที่กำหนด
+   * @return array
+   *
+   * @assert (array(array('id' => 1, 'name' => 'one'), array('id' => 2, 'name' => 'two'), array('id' => 3, 'name' => 'three')), 'name') [==] array(0 => 'one', 1 => 'two', 2 => 'three')
+   * @assert (array(array('id' => 1, 'name' => 'one'), array('id' => 2, 'name' => 'two'), array('id' => 3, 'name' => 'three')), 'name', 'id') [==] array(1 => 'one', 2 => 'two', 3 => 'three')
+   */
+  public static function columns($array, $column_key, $index_key = null)
+  {
+    $result = array();
+    if ($index_key == null) {
+      foreach ($array as $i => $item) {
+        if (isset($item[$column_key])) {
+          $result[$i] = $item[$column_key];
+        }
+      }
+    } else {
+      foreach ($array as $i => $item) {
+        if (isset($item[$column_key])) {
+          $result[$item[$index_key]] = $item[$column_key];
+        }
+      }
+    }
+    return $result;
+  }
+
+  /**
+   * ค้นหาแอเรย์ จากคอลัมน์
+   * คืนค่า index ตาม array ต้นฉบับ
+   *
+   * @param array $input ข้อมูลแอเรย์
+   * @param mixed $key คอลัมน์ที่ต้องการค้นหา
+   * @param mixed $search ข้อความค้นหา
+   * @return array คืนค่าทุกรายการที่พบ และ คืนค่าแอเรย์ว่างถ้าไม่พบ
+   *
+   * @assert (array(array('id' => 1, 'name' => 'one'), array('id' => 2, 'name' => 'two'), array('id' => 3, 'name' => 'one')), 'name', 'one') [==] array(0 => array('id' => 1, 'name' => 'one'), 2 => array('id' => 3, 'name' => 'one'))
+   * @assert (array(array('id' => 1, 'name' => 'one'), array('id' => 2, 'name' => 'two'), array('id' => 3, 'name' => 'one')), 'id', 'one') [==] array()
+   */
+  public static function search($input, $key, $search)
+  {
+    $result = array();
+    foreach ($input as $i => $values) {
+      if (isset($values[$key]) && $values[$key] == $search) {
+        $result[$i] = $values;
+      }
+    }
+    return $result;
   }
 
   /**

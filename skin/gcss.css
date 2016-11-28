@@ -2678,7 +2678,6 @@ tbody tr:not(.thead):not(.tfoot):hover, tbody tr.highlight, tbody tr.select, .da
   display: block;
   width: auto;
   padding: 10px;
-  border-bottom: 1px solid #DDD;
 }
 .datatable .table_nav.action {
   padding: 0 10px 10px;
@@ -2746,6 +2745,11 @@ td.icons, td.buttons {
 }
 td.buttons {
   text-align: right;
+}
+td.buttons .button {
+  border-radius: 0;
+  -moz-border-radius: 0;
+  -webkit-border-radius: 0;
 }
 td.buttons .button:first-child {
   border-top-left-radius: 5px;

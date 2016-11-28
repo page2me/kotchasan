@@ -80,22 +80,19 @@ abstract class Query extends \Kotchasan\Database\Db
   /**
    * ฟังก์ชั่นสร้างคำสั่ง SQL เป้นข้อความ
    *
+   * @param boolean $replace
    * @return string
    */
-  public function text()
+  public function text($replace = false)
   {
-    if (empty($this->sqls)) {
-      return '';
-    } else {
+    if (!empty($this->sqls)) {
       $sql = $this->db->makeQuery($this->sqls);
-      $values = $this->getValues();
-      if (!empty($values)) {
-        foreach ($values as $key => $value) {
-          $sql = str_replace($key, is_string($value) ? "'$value'" : $value, $sql);
-        }
+      foreach ($this->getValues() as $key => $value) {
+        $sql = str_replace($key, is_string($value) ? "'$value'" : $value, $sql);
       }
       return $sql;
     }
+    return '';
   }
 
   /**

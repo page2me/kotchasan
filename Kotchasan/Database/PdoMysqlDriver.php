@@ -50,7 +50,7 @@ class PdoMysqlDriver extends Driver
       try {
         $this->connection = new \PDO($sql, $this->settings->username, $this->settings->password, $this->options);
       } catch (\PDOException $e) {
-        $this->logError(__FUNCTION__, $e->getMessage());
+        throw new Exception($e->getMessage(), 500, $e);
       }
     } else {
       throw new \InvalidArgumentException('Database configuration is invalid');
@@ -90,8 +90,7 @@ class PdoMysqlDriver extends Driver
           $this->cache_item = $cache;
         }
       } catch (PDOException $e) {
-        $this->error_message = $e->getMessage();
-        $result = false;
+        throw new Exception($e->getMessage(), 500, $e);
       }
       $this->log('Database', $sql, $values);
     } else {
@@ -122,8 +121,7 @@ class PdoMysqlDriver extends Driver
       $this->log(__FUNCTION__, $sql, $values);
       return $query->rowCount();
     } catch (PDOException $e) {
-      $this->logError($sql, $e->getMessage());
-      return false;
+      throw new Exception($e->getMessage(), 500, $e);
     }
   }
 
@@ -182,8 +180,7 @@ class PdoMysqlDriver extends Driver
       self::$query_count++;
       return (int)$this->connection->lastInsertId();
     } catch (PDOException $e) {
-      $this->logError($sql, $e->getMessage());
-      return false;
+      throw new Exception($e->getMessage(), 500, $e);
     }
   }
 
@@ -301,13 +298,7 @@ class PdoMysqlDriver extends Driver
     if (is_int($limit) && $limit > 0) {
       $sql .= ' LIMIT '.$limit;
     }
-    $result = $this->doCustomQuery($sql, $values);
-    if ($result === false) {
-      $this->logError($sql, $this->error_message);
-      return array();
-    } else {
-      return $result;
-    }
+    return $this->doCustomQuery($sql, $values);
   }
 
   /**
@@ -352,8 +343,7 @@ class PdoMysqlDriver extends Driver
       self::$query_count++;
       return true;
     } catch (PDOException $e) {
-      $this->logError($sql, $e->getMessage());
-      return false;
+      throw new Exception($e->getMessage(), 500, $e);
     }
   }
 

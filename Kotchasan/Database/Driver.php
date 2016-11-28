@@ -9,7 +9,6 @@
 namespace Kotchasan\Database;
 
 use \Kotchasan\Database\QueryBuilder;
-use \Kotchasan\Database\Schema;
 use \Kotchasan\Database\DbCache as Cache;
 use \Kotchasan\Cache\Cacheitem as Item;
 use \Kotchasan\Database\Query;
@@ -156,10 +155,7 @@ abstract class Driver extends Query
   public function customQuery($sql, $toArray = false, $values = array())
   {
     $result = $this->doCustomQuery($sql, $values);
-    if ($result === false) {
-      $this->logError($sql, $this->error_message);
-      $result = array();
-    } elseif (!$toArray) {
+    if ($result && !$toArray) {
       foreach ($result as $i => $item) {
         $result[$i] = (object)$item;
       }
@@ -302,20 +298,6 @@ abstract class Driver extends Query
   }
 
   /**
-   * ฟังก์ชั่นจัดการ error ของ database
-   *
-   * @param string $sql
-   * @param string $message
-   */
-  protected function logError($sql, $message)
-  {
-    $trace = debug_backtrace();
-    $trace = next($trace);
-    // บันทึก error
-    Logger::create()->error($sql.' : <em>'.$message.'</em> in <b>'.$trace['file'].'</b> on line <b>'.$trace['line'].'</b>');
-  }
-
-  /**
    * ฟังก์ชั่นประมวลผลคำสั่ง SQL ที่ไม่ต้องการผลลัพท์ เช่น CREATE INSERT UPDATE.
    *
    * @param string $sql
@@ -324,11 +306,7 @@ abstract class Driver extends Query
    */
   public function query($sql, $values = array())
   {
-    $result = $this->doQuery($sql, $values);
-    if ($result === false) {
-      $this->logError($sql, $this->error_message);
-    }
-    return $result;
+    return $this->doQuery($sql, $values);
   }
 
   /**

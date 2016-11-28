@@ -121,23 +121,33 @@ code {
   border-left: 4px solid #F480D1;
   padding: 5px 0 5px 5px;
   display: block;
+  margin: 10px 0;
 }
 blockquote {
   display: block;
   font-style: italic;
   position: relative;
-  padding: 5px 20px;
+  padding: 5px 10px 5px 5em;
+  border: 1px dashed #DDD;
+  margin: 10px 0;
 }
-code, blockquote {
-  margin-top: 10px;
-  margin-bottom: 10px;
+blockquote:before {
+  content: "\201C";
+  line-height: 1;
+  font-size: 6em;
+  font-family: Georgia, serif;
+  position: absolute;
+  top: 0;
+  left: 5px;
+  display: block;
+  color: rgba(0,0,0,0.1);
 }
 code + br, blockquote + br {
   display: none;
 }
 code code,
 blockquote blockquote {
-  margin-right: 10px;
+  margin-left: 10px;
   padding-right: 0;
 }
 code ol,
