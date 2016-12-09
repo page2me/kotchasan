@@ -80,9 +80,8 @@ class Recordset extends Query implements \Iterator
     $this->values = array();
     $this->field->initTableName($this->db);
     if (method_exists($this->field, 'getConfig')) {
-      $result = $this->field->getConfig();
-      foreach ($result as $key => $value) {
-        $this->queryBuilder($key, $value);
+      foreach ($this->field->getConfig() as $key => $value) {
+        $this->buildQuery($key, $value);
       }
     }
   }
@@ -329,6 +328,16 @@ class Recordset extends Query implements \Iterator
   }
 
   /**
+   * คืนค่าอ๊อปเจ็ค Field ของ Recordset
+   *
+   * @return Field
+   */
+  public function getField()
+  {
+    return $this->field;
+  }
+
+  /**
    * รายชื่อฟิลด์ทั้งหมดของ Model
    *
    * @return array
@@ -406,7 +415,7 @@ class Recordset extends Query implements \Iterator
    */
   public function join($field, $type, $on)
   {
-    return $this->doJoin($field, $className, $on);
+    return $this->doJoin($field, $type, $on);
   }
 
   /**
@@ -443,7 +452,7 @@ class Recordset extends Query implements \Iterator
    * @param string $func
    * @param mixed $param
    */
-  private function queryBuilder($method, $param)
+  private function buildQuery($method, $param)
   {
     if ($method == 'join') {
       foreach ($param as $item) {
@@ -603,6 +612,16 @@ class Recordset extends Query implements \Iterator
   public function getValues()
   {
     return $this->values;
+  }
+
+  /**
+   * ส่งออกฐานข้อมูลเป็น QueryBuilder
+   *
+   * @return \Kotchasan\Database\QueryBuilder
+   */
+  public function toQueryBuilder()
+  {
+    return $this->db()->createQuery()->assignment($this);
   }
 
   /**

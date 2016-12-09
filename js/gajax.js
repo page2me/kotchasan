@@ -1336,6 +1336,9 @@ window.$K = (function () {
             this.select();
           });
         }
+        if (obj.type == 'number' || obj.type == 'email' || obj.type == 'url' || obj.type == 'color' || obj.type == 'currency') {
+          text.placeholder = this.placeholder;
+        }
         obj.element = text;
         text.data = obj;
         elements.push(obj);

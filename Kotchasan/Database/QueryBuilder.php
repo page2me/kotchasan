@@ -28,13 +28,13 @@ class QueryBuilder extends \Kotchasan\Database\Query
    *
    * @var bool
    */
-  private $toArray = false;
+  protected $toArray = false;
   /**
    * ตัวแปรเก็บ value สำหรับการ execute
    *
    * @var array
    */
-  private $values;
+  protected $values;
 
   /**
    * Class constructor
@@ -45,6 +45,38 @@ class QueryBuilder extends \Kotchasan\Database\Query
   {
     $this->db = $db;
     $this->values = array();
+  }
+
+  /**
+   * นำเข้า property จาก Class อื่น
+   *
+   * @param \Kotchasan\Orm\Recordset $src
+   * @return \static
+   */
+  public function assignment($src)
+  {
+    $this->sqls = array(
+      'function' => 'customQuery',
+      'select' => '*',
+    );
+    if ($src instanceof \Kotchasan\Orm\Recordset) {
+      $this->sqls['from'] = $src->getField()->getTableWithAlias();
+    }
+    foreach ($src->sqls as $k => $v) {
+      $this->sqls[$k] = $v;
+    }
+    $this->values = $src->getValues();
+    return $this;
+  }
+
+  /**
+   * สำเนา Class เป็นอันใหม่
+   *
+   * @return \static
+   */
+  public function copy()
+  {
+    return clone $this;
   }
 
   /**
@@ -129,7 +161,14 @@ class QueryBuilder extends \Kotchasan\Database\Query
     if (func_num_args() > 1) {
       $fields = func_get_args();
     }
-    call_user_func(array($this, 'select'), $fields);
+    if (!empty($fields)) {
+      // ถ้ามีการระบุฟิลด์มา
+      call_user_func(array($this, 'select'), $fields);
+    }
+    if (empty($this->sqls['select'])) {
+      // เลือกทุกฟิลด์ ถ้ายังไม่มีฟิลด์ที่ถูกเลือก
+      call_user_func(array($this, 'select'), '*');
+    }
     $this->sqls['limit'] = 1;
     $result = $this->execute();
     return empty($result) ? false : $result[0];
@@ -263,7 +302,9 @@ class QueryBuilder extends \Kotchasan\Database\Query
     if (!empty($start)) {
       $this->sqls['start'] = (int)$start;
     }
-    $this->sqls['limit'] = (int)$count;
+    if (!empty($count)) {
+      $this->sqls['limit'] = (int)$count;
+    }
     return $this;
   }
 
@@ -319,8 +360,10 @@ class QueryBuilder extends \Kotchasan\Database\Query
     if ($fields == '*') {
       $qs[] = '*';
     } else {
-      foreach (func_get_args() AS $item) {
-        $qs[] = $this->buildSelect($item);
+      foreach (func_get_args() as $item) {
+        if (!empty($item)) {
+          $qs[] = $this->buildSelect($item);
+        }
       }
     }
     if (sizeof($qs) > 0) {

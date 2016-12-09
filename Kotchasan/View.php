@@ -113,9 +113,6 @@ class View extends \Kotchasan\KBase
   public function renderHTML($template = null)
   {
     // default for template
-    if (!empty($this->metas)) {
-      $this->contents['/(<head.*)(<\/head>)/isu'] = '$1'.implode("\n", $this->metas).'$2';
-    }
     $this->contents['/{WEBTITLE}/'] = self::$cfg->web_title;
     $this->contents['/{WEBDESCRIPTION}/'] = self::$cfg->web_description;
     $this->contents['/{WEBURL}/'] = WEB_URL;
@@ -123,6 +120,9 @@ class View extends \Kotchasan\KBase
     $this->contents['/^[\s\t]+/m'] = '';
     foreach ($this->after_contents as $key => $value) {
       $this->contents[$key] = $value;
+    }
+    if (!empty($this->metas)) {
+      $this->contents['/(<head.*)(<\/head>)/isu'] = '$1'.implode("\n", $this->metas).'$2';
     }
     // แทนที่ลงใน Template
     if ($template === null) {

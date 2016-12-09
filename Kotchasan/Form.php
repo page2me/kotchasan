@@ -208,6 +208,7 @@ class Form extends \Kotchasan\KBase
     }
     if (empty($itemClass)) {
       $input = empty($comment) ? '' : '<div class="item"'.(empty($itemId) ? '' : ' id="'.$itemId.'"').'>';
+      $input = empty($unit) ? '' : '<div class="wlabel">';
       if (empty($labelClass) && empty($label)) {
         $input .= $element;
       } elseif (isset($type) && ($type === 'checkbox' || $type === 'radio')) {
@@ -215,11 +216,16 @@ class Form extends \Kotchasan\KBase
       } else {
         $input .= '<label'.(empty($labelClass) ? '' : ' class="'.$labelClass.'"').'>'.(empty($label) ? '' : $label.'&nbsp;').$element.'</label>';
       }
+      if (!empty($unit)) {
+        $input .= '<span class=label>'.$unit.'</span></div>';
+      }
       if (!empty($comment)) {
         $input .= '<div class="comment"'.(empty($id) ? '' : ' id="result_'.$id.'"').'>'.$comment.'</div></div>';
       }
     } else {
-      $itemClass .= isset($unit) ? ' wlabel' : '';
+      if (!empty($unit)) {
+        $itemClass .= ' wlabel';
+      }
       $input = '<div class="'.$itemClass.'"'.(empty($itemId) ? '' : ' id="'.$itemId.'"').'>';
       if (isset($type) && $type === 'checkbox') {
         $input .= '<label'.(empty($labelClass) ? '' : ' class="'.$labelClass.'"').'>'.$element.'&nbsp;'.$label.'</label>';
@@ -231,7 +237,7 @@ class Form extends \Kotchasan\KBase
           $input .= '<label for="'.$id.'">'.$label.'</label>';
         }
         $input .= '<span'.(empty($labelClass) ? '' : ' class="'.$labelClass.'"').'>'.$element.'</span>';
-        if (isset($unit)) {
+        if (!empty($unit)) {
           $input .= '<span class=label>'.$unit.'</span>';
         }
       }

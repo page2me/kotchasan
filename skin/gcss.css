@@ -186,6 +186,14 @@ h1, h2, h3, h4, h5, h6 {
   font-weight: inherit;
   position: relative;
 }
+em {
+  font-style: normal;
+  color: #FF5722;
+}
+.comment {
+  color: #259B24;
+  font-size: 0.9em;
+}
 /* Font Size */
 big {
   font-size: 1.2em;
@@ -222,7 +230,7 @@ mark {
   background-color: #4A5DB9;
 }
 .term1 {
-  background-color: #4CAF50;
+  background-color: #9C27B0;
 }
 .term2 {
   background-color: #2196F3;
@@ -236,40 +244,8 @@ mark {
 .term5 {
   background-color: #C768BE;
 }
-.new:after,
-.update:after,
-.hot:after,
-.recommend:after {
-  font-family: "Lucida Console", Monaco, monospace;
-  font-size: 10px;
-  font-weight: normal;
-  font-style: normal;
-  line-height: inherit;
-  padding: 0 2px;
-  margin: 0 0 0 5px;
-  border-radius: 3px;
-  -moz-border-radius: 3px;
-  -webkit-border-radius: 3px;
-}
-.new:after {
-  content: 'new';
-  background-color: #FF8400;
-  color: #FFF;
-}
-.update:after {
-  content: 'update';
-  background-color: #FFFF00;
-  color: #000;
-}
-.hot:after {
-  content: 'hot!';
-  background-color: #F00;
-  color: #FFF;
-}
-.recommend:after {
-  content: 'cool';
-  background-color: #259B24;
-  color: #FFF;
+.term6 {
+  background-color: #4CAF50;
 }
 /* layout */
 .gcss-wrapper {
@@ -288,9 +264,6 @@ body.fullwidth .gcss-wrapper {
 }
 .sidebar {
   width: 230px;
-}
-body.wide .sidebar {
-  width: 310px;
 }
 .leftsidebar {
   padding-left: 230px;
@@ -315,18 +288,6 @@ body.wide .sidebar {
   margin-left: 0px;
   margin-right: -230px;
   padding-left: 10px;
-}
-body.wide .leftsidebar {
-  padding-left: 310px;
-}
-body.wide .leftsidebar > .sidebar {
-  margin-left: -310px;
-}
-body.wide .rightsidebar {
-  padding-right: 310px;
-}
-body.wide .rightsidebar > .sidebar {
-  margin-right: -310px;
 }
 .clear,
 .document-list,
@@ -543,6 +504,10 @@ fieldset fieldset > legend {
   display: inline-block;
   vertical-align: middle;
   white-space: nowrap;
+}
+td > .wlabel {
+  border-collapse: separate;
+  display: table;
 }
 .wlabel .g-input,
 .wlabel .label {
@@ -1124,7 +1089,6 @@ form .comment {
   display: inline-block;
 }
 .usericon img {
-  width: 100%;
   max-height: 200px;
   max-width: 200px;
 }
