@@ -204,7 +204,7 @@ class DataTable extends \Kotchasan\KBase
    *
    * @var string
    */
-  public $sort = null;
+  public $sort;
   /**
    * ข้อมูลการเรียงลำดับที่กำลังใช้งานอยู่
    *
@@ -330,9 +330,7 @@ class DataTable extends \Kotchasan\KBase
       }
       $this->headers = $headers;
     }
-    if ($this->sort === null) {
-      $this->sort = self::$request->globals(array('POST', 'GET'), 'sort')->toString();
-    }
+    $this->sort = self::$request->globals(array('POST', 'GET'), 'sort', $this->sort)->toString();
     if (!empty($this->sort)) {
       $this->uri = $this->uri->withParams(array('sort' => $this->sort));
     }
@@ -408,6 +406,11 @@ class DataTable extends \Kotchasan\KBase
         }
       }
     }
+    if ($this->model) {
+      if (!empty($qs)) {
+        $this->model->where($qs);
+      }
+    }
     // ปุ่ม Go
     if (!empty($form)) {
       $form[] = '<fieldset>';
@@ -424,7 +427,7 @@ class DataTable extends \Kotchasan\KBase
           foreach ($this->searchColumns as $key) {
             $sh[] = array($key, 'LIKE', "%$search%");
           }
-          $this->model->where($sh, 'OR');
+          $this->model->andWhere($sh, 'OR');
         } elseif (isset($this->datas)) {
           // filter ข้อมูลจาก array
           $this->datas = ArrayTool::filter($this->datas, $search);
@@ -440,9 +443,8 @@ class DataTable extends \Kotchasan\KBase
       $content[] = '<form class="table_nav" method="get" action="'.$this->uri.'">'.implode('', $form).'</form>';
     }
     if (isset($this->model)) {
-      if (!empty($qs)) {
-        $this->model->where($qs);
-      }
+      // field select
+      $this->model->select($this->fields);
       // จำนวนข้อมูลทั้งหมด (Query Builder)
       $model = new \Kotchasan\Model;
       $query = $model->db()->createQuery()
@@ -523,7 +525,7 @@ class DataTable extends \Kotchasan\KBase
     }
     if (isset($this->model)) {
       // query ข้อมูล
-      $this->datas = $this->model->select($this->fields)->toArray()->limit($this->perPage, $start)->execute();
+      $this->datas = $this->model->toArray()->limit($this->perPage, $start)->execute();
       // รายการสุดท้าย
       $end = $this->perPage + 1;
       // รายการแรก

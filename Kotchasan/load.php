@@ -60,11 +60,10 @@ if (isset($_SERVER['APPL_PHYSICAL_PATH'])) {
   $docRoot = rtrim(realpath($_SERVER['APPL_PHYSICAL_PATH']), DIRECTORY_SEPARATOR);
 } elseif (isset($_SERVER['CONTEXT_DOCUMENT_ROOT'])) {
   $docRoot = rtrim(realpath($_SERVER['CONTEXT_DOCUMENT_ROOT']), DIRECTORY_SEPARATOR);
-} else {
+} elseif (strpos($_SERVER['SCRIPT_FILENAME'], $_SERVER['DOCUMENT_ROOT']) !== false) {
   $docRoot = rtrim(realpath($_SERVER['DOCUMENT_ROOT']), DIRECTORY_SEPARATOR);
-}
-if (DIRECTORY_SEPARATOR != '/') {
-  $docRoot = str_replace('\\', '/', $docRoot);
+} else {
+  define('APP_PATH', '');
 }
 /**
  * พาธของ Application เช่น D:/htdocs/kotchasan/
@@ -77,6 +76,7 @@ if (!defined('APP_PATH')) {
   }
   if (DIRECTORY_SEPARATOR != '/') {
     $appPath = str_replace('\\', '/', $appPath);
+    $docRoot = str_replace('\\', '/', $docRoot);
   }
   define('APP_PATH', rtrim($docRoot.$appPath, '/').'/');
 }

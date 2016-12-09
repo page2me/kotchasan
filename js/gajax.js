@@ -820,8 +820,13 @@ window.$K = (function () {
     },
     invalid: function (value, className) {
       if (!this.ret) {
-        if (typeof this.result === 'string' && this.result !== '' && $E(this.result)) {
-          this.ret = $G(this.result);
+        if (
+          typeof this.dataset !== 'undefined' &&
+          typeof this.dataset.result === 'string' &&
+          this.dataset.result !== '' &&
+          $E(this.dataset.result)
+          ) {
+          this.ret = $G(this.dataset.result);
         } else {
           var id = this.id || this.name;
           if ($E('result_' + id)) {
@@ -1206,7 +1211,16 @@ window.$K = (function () {
         obj.required = this.get('required');
         obj.disabled = this.get('disabled') !== null;
         obj.maxlength = null;
-        obj.result = this.get('data-result');
+        obj.dataset = this.dataset;
+        if (typeof obj.dataset == 'undefined') {
+          obj.dataset = {};
+          forEach(this.attributes, function () {
+            var hs = this.name.match(/^data-(.+)/);
+            if (hs) {
+              obj.dataset[hs[0]] = this.value;
+            }
+          });
+        }
         if (obj.tagName == 'textarea') {
           obj.maxlength = this.get('maxlength');
           if (obj.maxlength !== null) {
@@ -1373,7 +1387,11 @@ window.$K = (function () {
             obj.pattern = /^((transparent)|(\#[0-9a-fA-F]{6,6}))$/i;
           }
         }
-        text.result = obj.result;
+        if (typeof obj.dataset !== 'undefined') {
+          for (var prop in obj.dataset) {
+            text.setAttribute('data-' + prop, obj.dataset[prop]);
+          }
+        }
         if (obj.pattern !== null || obj.type == 'number') {
           text.addEvent('change', _docheck);
         }
@@ -2361,6 +2379,16 @@ window.$K = (function () {
       this.input.set('title', this.title);
       this.input.reset();
     }
+  };
+  Number.prototype.format = function (decimals, dec_point, thousands_sep) {
+    decimals = isNaN(decimals = Math.abs(decimals)) ? 2 : decimals;
+    dec_point = dec_point == undefined ? "." : dec_point;
+    thousands_sep = thousands_sep == undefined ? "," : thousands_sep;
+    var n = this,
+      s = n < 0 ? "-" : "",
+      i = String(parseInt(n = Math.abs(Number(n) || 0).toFixed(decimals))),
+      j = (j = i.length) > 3 ? j % 3 : 0;
+    return s + (j ? i.substr(0, j) + thousands_sep : "") + i.substr(j).replace(/(\d{3})(?=\d)/g, "$1" + thousands_sep) + (decimals ? dec_point + Math.abs(n - i).toFixed(decimals).slice(2) : "");
   };
   String.prototype.hexToRgb = function (a) {
     var h = this.match(new RegExp('^[#]{0,1}([\\w]{1,2})([\\w]{1,2})([\\w]{1,2})$'));

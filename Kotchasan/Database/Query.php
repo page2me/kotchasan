@@ -543,6 +543,9 @@ abstract class Query extends \Kotchasan\Database\Db
       } elseif (empty($value)) {
         // value เป็น string ว่าง, 0, null
         $result = $key.' '.$operator.' '.(is_string($value) ? "'$value'" : $value);
+      } elseif (preg_match('/^\(.*\)$/', $value)) {
+        // value อยู่ในวงเล็บ (...)
+        $result = $key.' '.$operator.' '.$value;
       } elseif (preg_match('/^(\-?[0-9\s\.]+|true|false)$/i', $value)) {
         // value เป็น ตัวเลข จุดทศนิยม เครื่องหมาย - / , และ true, false
         // เช่น ตัวเลข, จำนวนเงิน, boolean

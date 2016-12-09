@@ -524,6 +524,7 @@ class QueryBuilder extends \Kotchasan\Database\Query
    * @assert where(array(array('MONTH(create_date)', 1), array('YEAR(create_date)', 1)))->text() [==] " WHERE MONTH(create_date) = 1 AND YEAR(create_date) = 1"
    * @assert where(array(array('id', array(1, 'a')), array('id', array('G.id', 'G.`id2`'))))->text() [==] " WHERE `id` IN (1, 'a') AND `id` IN (G.`id`, G.`id2`)"
    * @assert where(array('ip', 'NOT IN', array('', '192.168.1.104')))->text() [==] " WHERE `ip` NOT IN ('', '192.168.1.104')"
+   * @assert where(array('U.id', '(SELECT CASE END)'))->text() [==] " WHERE U.`id` = (SELECT CASE END)"
    */
   public function where($condition, $oprator = 'AND', $id = 'id')
   {
@@ -533,6 +534,50 @@ class QueryBuilder extends \Kotchasan\Database\Query
       $this->values = ArrayTool::replace($this->values, $ret[1]);
     } else {
       $this->sqls['where'] = $ret;
+    }
+    return $this;
+  }
+
+  /**
+   * ฟังก์ชั่นสร้างคำสั่ง WHERE ถ้ามีข้อมูล Where ก่อนหน้าจะ OR กับข้อมูลก่อนหน้า
+   *
+   * @param mixed $condition query string หรือ array
+   * @param string $oprator defaul AND
+   * @param string $id Primary Key เช่น id (default)
+   * @return \static
+   *
+   * @assert where(array('U.id', 1))->orWhere(array('U.id', 2))->text() [==] " WHERE (U.`id` = 1) OR (U.`id` = 2)"
+   */
+  public function orWhere($condition, $oprator = 'AND', $id = 'id')
+  {
+    $ret = $this->buildWhere($condition, $oprator, $id);
+    if (is_array($ret)) {
+      $this->sqls['where'] = empty($this->sqls['where']) ? $ret[0] : '('.$this->sqls['where'].') OR ('.$ret[0].')';
+      $this->values = ArrayTool::replace($this->values, $ret[1]);
+    } else {
+      $this->sqls['where'] = empty($this->sqls['where']) ? $ret : '('.$this->sqls['where'].') OR ('.$ret.')';
+    }
+    return $this;
+  }
+
+  /**
+   * ฟังก์ชั่นสร้างคำสั่ง WHERE ถ้ามีข้อมูล Where ก่อนหน้าจะ AND กับข้อมูลก่อนหน้า
+   *
+   * @param mixed $condition query string หรือ array
+   * @param string $oprator defaul AND
+   * @param string $id Primary Key เช่น id (default)
+   * @return \static
+   *
+   * @assert where(array('U.id', 1))->andWhere(array('U.id', 2))->text() [==] " WHERE (U.`id` = 1) AND (U.`id` = 2)"
+   */
+  public function andWhere($condition, $oprator = 'AND', $id = 'id')
+  {
+    $ret = $this->buildWhere($condition, $oprator, $id);
+    if (is_array($ret)) {
+      $this->sqls['where'] = empty($this->sqls['where']) ? $ret[0] : '('.$this->sqls['where'].') AND ('.$ret[0].')';
+      $this->values = ArrayTool::replace($this->values, $ret[1]);
+    } else {
+      $this->sqls['where'] = empty($this->sqls['where']) ? $ret : '('.$this->sqls['where'].') AND ('.$ret.')';
     }
     return $this;
   }

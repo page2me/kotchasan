@@ -107,12 +107,12 @@ class Login extends \Kotchasan\KBase implements LoginInterface
       // ตรวจสอบค่าที่ส่งมา
       if (self::$text_username == '') {
         if ($login->from_submit) {
-          self::$login_message = Language::get('Please fill out this form');
+          self::$login_message = 'Please fill in';
           self::$login_input = 'login_username';
         }
       } elseif (self::$text_password == '') {
         if ($login->from_submit) {
-          self::$login_message = Language::get('Please fill out this form');
+          self::$login_message = 'Please fill in';
           self::$login_input = 'login_password';
         }
       } elseif (!$login->from_submit || ($login->from_submit && self::$request->isSafe())) {

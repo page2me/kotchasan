@@ -360,8 +360,8 @@ final class Language extends \Kotchasan\KBase
       new static;
     }
     $result = array();
-    foreach ($keys as $key) {
-      $result[$key] = isset(self::$languages->$key) ? self::$languages->$key : $key;
+    foreach ($keys as $i => $key) {
+      $result[is_int($i) ? $key : $i] = isset(self::$languages->$key) ? self::$languages->$key : $key;
     }
     return $result;
   }

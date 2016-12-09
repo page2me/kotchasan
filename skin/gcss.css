@@ -2821,6 +2821,24 @@ td.buttons .button:last-child {
   text-decoration: none;
   color: #FFF;
 }
+/* autocomplete */
+.gautocomplete {
+  color: #666;
+  background-color: #FFF;
+  border: 1px solid #DDD;
+  box-shadow: 3px 3px 3px rgba(0, 0, 0, 0.1);
+}
+.gautocomplete > p {
+  display: block;
+  margin: 0;
+  padding: 5px 10px;
+  text-decoration: none;
+  cursor: pointer;
+}
+.gautocomplete > p.select {
+  background-color: rgba(0, 0, 0, 0.05);
+  color: #000;
+}
 @media only screen and (max-width: 1360px) {
   /* side menu */
   body.responsive .sidemenu.responsive > ul ul a {
