@@ -1273,6 +1273,7 @@ window.$K = (function () {
           } else {
             src = new GCalendar(text, function () {
               hidden.value = this.getDateFormat('y-m-d');
+              hidden.calendar = this;
               hidden.callEvent('change');
             });
             if (obj.min) {
