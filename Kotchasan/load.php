@@ -63,6 +63,7 @@ if (isset($_SERVER['APPL_PHYSICAL_PATH'])) {
 } elseif (strpos($_SERVER['SCRIPT_FILENAME'], $_SERVER['DOCUMENT_ROOT']) !== false) {
   $docRoot = rtrim(realpath($_SERVER['DOCUMENT_ROOT']), DIRECTORY_SEPARATOR);
 } else {
+  $docRoot = '';
   define('APP_PATH', '');
 }
 /**
@@ -134,6 +135,16 @@ if (!defined('DATA_FOLDER')) {
  */
 if (!defined('TEMPLATE_ROOT')) {
   define('TEMPLATE_ROOT', APP_PATH);
+}
+/**
+ * กำหนดจำนวนครั้งในการตรวจสอบ token
+ * ถ้ามีการตรวจสอบ token เกินกว่าที่กำหนดจะถูกลบออก
+ * ป้องกันการ buteforce
+ *
+ * @var int
+ */
+if (!defined('TOKEN_LIMIT')) {
+  define('TOKEN_LIMIT', 10);
 }
 
 /**
