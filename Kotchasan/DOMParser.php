@@ -35,7 +35,6 @@ class DOMParser
   public function __construct($html, $charset = 'utf-8')
   {
     $patt = array(
-      '/^(.*)<body[^>]{0,}>(.*)<\/body>(.*)$/is' => '\\2',
       '#<(style|script)(.*?)>(.*?)</\\1>#is' => '',
       '@<!--.*-->@is' => '',
       '/<(\!|link|meta)[^>]+\>/i' => '',
