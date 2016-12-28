@@ -44,6 +44,7 @@ class Email extends \Kotchasan\Model
       $msg = iconv('utf-8', $charset, $msg);
       $replyto[1] = iconv('utf-8', $charset, $replyto[1]);
     }
+    $msg = preg_replace(array('/<\?/', '/\?>/'), array('&lt;?', '?&gt;'), $msg);
     $messages = array();
     if (empty(self::$cfg->email_use_phpMailer)) {
       // ส่งอีเมล์ด้วยฟังก์ชั่นของ PHP
@@ -84,7 +85,9 @@ class Email extends \Kotchasan\Model
         $mail->Port = self::$cfg->email_Port;
       }
       $mail->AddReplyTo($replyto[0], $replyto[1]);
-      $mail->SetFrom(self::$cfg->noreply_email, strip_tags(self::$cfg->web_title));
+      if ($mail->ValidateAddress(self::$cfg->noreply_email)) {
+        $mail->SetFrom(self::$cfg->noreply_email, strip_tags(self::$cfg->web_title));
+      }
       // subject
       $mail->Subject = $subject;
       // message
