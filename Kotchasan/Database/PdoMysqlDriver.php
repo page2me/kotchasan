@@ -311,6 +311,7 @@ class PdoMysqlDriver extends Driver
   {
     $this->settings->dbname = $database;
     $result = $this->connection->query("USE $database");
+    self::$query_count++;
     return $result === false ? false : true;
   }
 

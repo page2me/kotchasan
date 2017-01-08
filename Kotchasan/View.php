@@ -48,16 +48,23 @@ class View extends \Kotchasan\KBase
    * ใส่เนื้อหาลงใน $contens
    *
    * @param array $array ชื่อที่ปรากฏใน template รูปแบบ array(key1 => val1, key2 => val2)
-   * @param boolean $before true (default) ใส่ก่อน render, false ใส่หลัง render
    */
-  public function setContents($array, $before = true)
+  public function setContents($array)
   {
     foreach ($array as $key => $value) {
-      if ($before) {
-        $this->contents[$key] = $value;
-      } else {
-        $this->after_contents[$key] = $value;
-      }
+      $this->contents[$key] = $value;
+    }
+  }
+
+  /**
+   * ใส่เนื้อหาลงใน $contens หลัง render แล้ว
+   *
+   * @param array $array ชื่อที่ปรากฏใน template รูปแบบ array(key1 => val1, key2 => val2)
+   */
+  public function setContentsAfter($array)
+  {
+    foreach ($array as $key => $value) {
+      $this->after_contents[$key] = $value;
     }
   }
 

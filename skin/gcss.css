@@ -268,6 +268,9 @@ body.fullwidth .gcss-wrapper {
 .leftsidebar {
   padding-left: 230px;
 }
+.leftsidebar.wide {
+  padding-left: 300px;
+}
 .leftsidebar > .content {
   float: right;
 }
@@ -277,8 +280,14 @@ body.fullwidth .gcss-wrapper {
   margin-left: -230px;
   padding-right: 10px;
 }
+.leftsidebar.wide > .sidebar {
+  margin-left: -300px;
+}
 .rightsidebar {
   padding-right: 230px;
+}
+.rightsidebar.wide {
+  padding-left: 300px;
 }
 .rightsidebar > .content {
   float: left;
@@ -288,6 +297,13 @@ body.fullwidth .gcss-wrapper {
   margin-left: 0px;
   margin-right: -230px;
   padding-left: 10px;
+}
+.rightsidebar.wide > .sidebar {
+  margin-right: -300px;
+}
+.rightsidebar.wide > .sidebar,
+.leftsidebar.wide > .sidebar {
+  width: 300px;
 }
 .clear,
 .document-list,
@@ -2766,7 +2782,7 @@ td.buttons .button:last-child {
   display: block;
 }
 .thumbview .description {
-  height: 4.8em;
+  height: 600%;
   overflow: hidden;
 }
 .document-list .figure {
