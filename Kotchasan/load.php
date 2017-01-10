@@ -222,6 +222,8 @@ function getClassPath($className)
   } elseif (preg_match('/^([\/a-zA-Z0-9]+)$/', $className)) {
     if (is_file(VENDOR_DIR.$className.'.php')) {
       return VENDOR_DIR.$className.'.php';
+    } elseif (is_file(APP_PATH.$className.'.php')) {
+      return APP_PATH.$className.'.php';
     } elseif (is_file(ROOT_PATH.$className.'.php')) {
       return ROOT_PATH.$className.'.php';
     } else {
