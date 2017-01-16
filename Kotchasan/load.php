@@ -66,18 +66,24 @@ if (isset($_SERVER['APPL_PHYSICAL_PATH'])) {
   $docRoot = '';
   define('APP_PATH', '');
 }
+if (DIRECTORY_SEPARATOR != '/' && $docRoot != '') {
+  $docRoot = str_replace('\\', '/', $docRoot);
+}
+/**
+ * ตัวแปร CONTEXT_PREFIX เช่น /~username
+ */
+$contextPrefix = isset($_SERVER['CONTEXT_PREFIX']) ? $_SERVER['CONTEXT_PREFIX'] : '';
 /**
  * พาธของ Application เช่น D:/htdocs/kotchasan/
  */
 if (!defined('APP_PATH')) {
   $appPath = dirname($_SERVER['SCRIPT_NAME']);
-  if (!empty($_SERVER['CONTEXT_PREFIX'])) {
-    $ds = explode($_SERVER['CONTEXT_PREFIX'], $appPath);
+  if (!empty($contextPrefix)) {
+    $ds = explode($contextPrefix, $appPath);
     $appPath = $ds[1];
   }
   if (DIRECTORY_SEPARATOR != '/') {
     $appPath = str_replace('\\', '/', $appPath);
-    $docRoot = str_replace('\\', '/', $docRoot);
   }
   define('APP_PATH', rtrim($docRoot.$appPath, '/').'/');
 }
@@ -117,12 +123,11 @@ if (!defined('BASE_PATH')) {
     define('BASE_PATH', rtrim($basePath, '/').'/');
   }
 }
-
 /**
  * URL ของเว็บไซต์รวม path เช่น http://domain.tld/folder
  */
 if (!defined('WEB_URL')) {
-  define('WEB_URL', $scheme.$host.str_replace($docRoot, '', ROOT_PATH));
+  define('WEB_URL', $scheme.$host.$contextPrefix.str_replace($docRoot, '', ROOT_PATH));
 }
 /**
  * โฟลเดอร์เก็บข้อมูล

@@ -969,9 +969,7 @@ window.$K = (function () {
             if (self._xhr.status == 200 && !self._abort && Object.isFunction(callback)) {
               self.responseText = self._xhr.responseText;
               self.responseXML = self._xhr.responseXML;
-              if (callback) {
-                callback(self);
-              }
+              callback(self);
             } else {
               option.onError(self);
             }
