@@ -19,6 +19,7 @@
         get: $K.emptyFunction,
         populate: $K.emptyFunction,
         onRequest: $K.emptyFunction,
+        onSuccess: $K.emptyFunction,
         loadingClass: 'wait',
         url: false,
         interval: 300
@@ -55,7 +56,7 @@
           }
         });
       }
-      var _mouseclick = function () {
+      function onSelect() {
         if (showing) {
           _hide();
           try {
@@ -63,6 +64,10 @@
           } catch (e) {
           }
         }
+      }
+      var _mouseclick = function () {
+        onSelect.call(this);
+        options.onSuccess.call(input);
       };
       var _mousemove = function () {
         _movehighlight(this.itemindex);
@@ -142,11 +147,13 @@
           cancleEvent = true;
         } else if (key == 13) {
           cancleEvent = true;
+          this.removeClass(options.loadingClass);
           forEach(list, function () {
             if (this.itemindex == listindex) {
-              _mouseclick.call(this);
+              onSelect.call(this);
             }
           });
+          options.onSuccess.call(input);
         }
         if (cancleEvent) {
           GEvent.stop(evt);

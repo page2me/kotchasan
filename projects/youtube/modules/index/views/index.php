@@ -48,7 +48,7 @@ class View extends \Kotchasan\View
       // แสดงผล
       echo '<html style="height:100%;width:100%"><head>';
       echo '<meta charset=utf-8>';
-      echo '<meta name=viewport content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">';
+      echo '<meta name=viewport content="width=device-width, initial-scale=1.0">';
       echo '</head><body style="height:100%;width:100%;margin:0;font-family:Tahoma, Loma;color:#666;">';
       echo '<h1>'.$datas->items[0]->snippet->title.'</h1>';
       echo '<p><a href="https://www.youtube.com/watch?v='.$youtube.'" target=_blank><img src="'.$datas->items[0]->snippet->thumbnails->high->url.'"></a></p>';

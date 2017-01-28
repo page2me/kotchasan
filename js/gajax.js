@@ -805,6 +805,56 @@ window.$K = (function () {
       this.tooltip.show(this, value);
       return this;
     },
+    msgBox: function (value, className, autohide) {
+      var parent,
+        tag = this.tagName.toLowerCase();
+      if (tag == 'body') {
+        if ($E('body_msg_div')) {
+          parent = $E('body_msg_div');
+        } else {
+          parent = document.createElement('div');
+          parent.id = 'body_msg_div';
+          parent.style.position = 'fixed';
+          parent.style.right = '10px';
+          parent.style.top = '10px';
+          document.body.appendChild(parent);
+        }
+      } else {
+        parent = this;
+      }
+      if (parent) {
+        if (value && value != '') {
+          var div = document.createElement('div');
+          div.innerHTML = value;
+          div.className = 'alert ' + (className || 'message');
+          var span = document.createElement('span');
+          span.innerHTML = '&times;';
+          span.className = 'closebtn';
+          div.appendChild(span);
+          parent.appendChild(div);
+        }
+        forEach(parent.getElementsByClassName('closebtn'), function () {
+          if (this.onclick === null) {
+            var span = this;
+            span.onclick = function () {
+              var parent = this.parentNode;
+              parent.style.opacity = "0";
+              if (this.timer) {
+                clearTimeout(this.timer);
+              }
+              setTimeout(function () {
+                parent.remove();
+              }, 600);
+            };
+            if (typeof autohide === 'undefined' || autohide === true) {
+              span.timer = setTimeout(function () {
+                span.click();
+              }, 3000);
+            }
+          }
+        });
+      }
+    },
     valid: function (className) {
       if (this.ret) {
         if (this.ret.hasClass('validationResult')) {

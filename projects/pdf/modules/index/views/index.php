@@ -25,7 +25,7 @@ class View extends \Kotchasan\View
     echo '<meta charset=utf-8>';
     echo '<link href="../../skin/gcss.css" rel="stylesheet" type="text/css">';
     echo '<link href="../../skin/fonts.css" rel="stylesheet" type="text/css">';
-    echo '<meta name=viewport content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">';
+    echo '<meta name=viewport content="width=device-width, initial-scale=1.0">';
     echo '<style>';
     echo '.warper{display:inline-block;text-align:center;height:50%;}';
     echo '.warper::before{content:"";display:inline-block;height:100%;vertical-align:middle;width:0px;}';

@@ -35,13 +35,13 @@ a.icon-delete:before, a.icon-edit:before, a.icon-check:before, a.icon-uncheck:be
   margin: 0;
 }
 .icon-office:before {
-  content: "\e900";
+  content: "\e901";
 }
 .icon-excel:before {
-  content: "\e903";
+  content: "\e904";
 }
 .icon-pdf:before {
-  content: "\e904";
+  content: "\e905";
 }
 .icon-word:before {
   content: "\e907";
@@ -66,13 +66,13 @@ a.icon-delete:before, a.icon-edit:before, a.icon-check:before, a.icon-uncheck:be
   content: '\e6dc';
 }
 .icon-rocket:before {
-  content: "\e901";
-}
-.icon-shuffle:before {
   content: "\e902";
 }
+.icon-shuffle:before {
+  content: "\e903";
+}
 .icon-git:before {
-  content: "\e905";
+  content: "\e906";
 }
 .icon-address:before {
   content: "\e69c";
@@ -722,4 +722,6 @@ a.icon-delete:before, a.icon-edit:before, a.icon-check:before, a.icon-uncheck:be
 .icon-zip:before {
   content: "\f1c6";
 }
-
+.icon-number:before {
+  content: "\2a";
+}

@@ -266,7 +266,7 @@ class InputItem
   }
 
   /**
-   * แปลง < > \ เป็น HTML entities และแปลง \n เป็น <br>
+   * แปลง < > \ { } เป็น HTML entities และแปลง \n เป็น <br>
    * และลบช่องว่างหัวท้าย
    * ใช้รับข้อมูลที่มาจาก textarea
    *
@@ -276,7 +276,7 @@ class InputItem
    */
   public function textarea()
   {
-    return trim(preg_replace(array('/</s', '/>/s', '/\\\/s'), array('&lt;', '&gt;', '&#92;'), $this->value));
+    return trim(preg_replace(array('/</s', '/>/s', '/\\\/s', '/\{/', '/\}/'), array('&lt;', '&gt;', '&#92;', '&#x007B;', '&#x007D;'), $this->value));
   }
 
   /**
@@ -432,16 +432,16 @@ class InputItem
   }
 
   /**
-   * แปลง & " ' < > \ เป็น HTML entities ใช้แทน htmlspecialchars() ของ PHP
+   * แปลง & " ' < > \ { } เป็น HTML entities ใช้แทน htmlspecialchars() ของ PHP
    *
    * @param boolean $double_encode true (default) แปลง รหัส HTML เช่น &amp; เป็น &amp;amp;, false ไม่แปลง
    * @return \static
    */
   private function htmlspecialchars($double_encode = true)
   {
-    $str = preg_replace(array('/&/', '/"/', "/'/", '/</', '/>/', '/\\\/'), array('&amp;', '&quot;', '&#039;', '&lt;', '&gt;', '&#92;'), $this->value);
+    $str = preg_replace(array('/&/', '/"/', "/'/", '/</', '/>/', '/\\\/', '/\{/', '/\}/'), array('&amp;', '&quot;', '&#039;', '&lt;', '&gt;', '&#92;', '&#x007B;', '&#x007D;'), $this->value);
     if (!$double_encode) {
-      $str = preg_replace('/&(amp;([#a-z0-9]+));/', '&\\2;', $str);
+      $str = preg_replace('/&(amp;([#a-z0-9]+));/i', '&\\2;', $str);
     }
     return $str;
   }

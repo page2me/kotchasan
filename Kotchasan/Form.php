@@ -179,12 +179,16 @@ class Form extends \Kotchasan\KBase
     } elseif (isset($value)) {
       if ($this->tag === 'textarea') {
         $value = str_replace(array('{', '}', '&amp;'), array('&#x007B;', '&#x007D;', '&'), htmlspecialchars($value));
-      } else {
+      } elseif ($this->tag != 'button') {
         $prop['value'] = 'value="'.str_replace('&amp;', '&', htmlspecialchars($value)).'"';
       }
     }
-    if (empty($prop['title']) && !empty($comment)) {
-      $prop['title'] = 'title="'.strip_tags($comment).'"';
+    if (empty($prop['title'])) {
+      if (!empty($comment)) {
+        $prop['title'] = 'title="'.strip_tags($comment).'"';
+      } elseif (!empty($label)) {
+        $prop['title'] = 'title="'.strip_tags($label).'"';
+      }
     }
     if (isset($dataPreview)) {
       $prop['data-preview'] = 'data-preview="'.$dataPreview.'"';

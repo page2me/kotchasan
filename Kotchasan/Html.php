@@ -142,6 +142,11 @@ class Html extends \Kotchasan\KBase
         'class' => 'row'
       ));
       $this->rows[] = $obj;
+    } elseif ($tag == 'rowgroup') {
+      $obj = new static('div', array(
+        'class' => 'rowgroup'
+      ));
+      $this->rows[] = $obj;
     } elseif ($tag == 'radiogroups' || $tag == 'checkboxgroups') {
       $prop = array('class' => 'item');
       if (!empty($attributes['itemId'])) {

@@ -3,13 +3,14 @@
 }
 body {
   margin: 0 auto;
-  font-family: 'Angsana New', Tahoma, Loma, 'Times New Roman', Times, serif;
+  font-family: Tahoma, Loma, 'Times New Roman', Times, serif;
   font-size: 12pt;
   color: #000;
   max-width: 210mm;
 }
 h1 {
   font-size: 2em;
+  text-align: center;
 }
 h2 {
   font-size: 1.8em;
