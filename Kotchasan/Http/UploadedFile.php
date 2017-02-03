@@ -141,10 +141,10 @@ class UploadedFile implements UploadedFileInterface
       if (!move_uploaded_file($this->tmp_name, $targetPath)) {
         throw new \RuntimeException(sprintf(Language::get('Error moving uploaded file %1s to %2s'), $this->name, $targetPath));
       }
+    } elseif (copy($this->tmp_name, $targetPath)) {
+      unlink($this->tmp_name);
     } else {
-      if (!rename($this->tmp_name, $targetPath)) {
-        throw new \RuntimeException(sprintf(Language::get('Error moving uploaded file %1s to %2s'), $this->name, $targetPath));
-      }
+      throw new \RuntimeException(sprintf(Language::get('Error moving uploaded file %1s to %2s'), $this->name, $targetPath));
     }
     $this->isMoved = true;
     return true;

@@ -83,7 +83,7 @@ class Router extends \Kotchasan\KBase
    *
    * @assert ('/print.php/css/view/index', array()) [==] array( '_mvc' => 'view', '_dir' => 'index', 'module' => 'css')
    * @assert ('/index/model/updateprofile.php', array()) [==] array( '_mvc' => 'model', '_dir' => 'updateprofile', 'module' => 'index')
-   * @assert ('/index.php/alias/model/admin/settings/save') [==] array('module' => 'alias', '_mvc' => 'model', '_dir' => 'admin/settings', '_method' => 'save')
+   * @assert ('/index.php/alias/model/admin/settings/save', array()) [==] array('module' => 'alias', '_mvc' => 'model', '_dir' => 'admin/settings', '_method' => 'save')
    * @assert ('/css/view/index.php', array()) [==] array('module' => 'css', '_mvc' => 'view', '_dir' => 'index')
    * @assert ('/module/1/2.html', array()) [==] array('module' => 'module', 'cat' => 1, 'id' => 2)
    * @assert ('/module/1.html', array()) [==] array('module' => 'module', 'cat' => 1)

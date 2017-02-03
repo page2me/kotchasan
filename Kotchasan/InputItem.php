@@ -409,7 +409,7 @@ class InputItem
    *
    * @assert create(12345)->number() [==] '12345'
    * @assert create(0.12345)->number() [==] '012345'
-   * @assert create(ทด0123สอ4บ5)->number() [==] '012345'
+   * @assert create('ทด0123สอ4บ5')->number() [==] '012345'
    */
   public function number()
   {

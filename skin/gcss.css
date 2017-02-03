@@ -872,6 +872,7 @@ html .button:before,
 .bg-blue, .button.blue, .button.register, .button.logout, .button.add {
   background-color: #2196F3;
 }
+.button.facebook,
 .facebook .blue {
   background-color: #5B74A8;
 }

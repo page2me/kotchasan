@@ -1216,7 +1216,8 @@ window.$K = (function () {
           if (val == '') {
             this.addClass('required');
             if (e) {
-              this.invalid(data.title !== '' ? data.title : trans('Please fill in'));
+              var placeholder = this.placeholder;
+              this.invalid(data.title !== '' ? data.title : trans('Please fill in') + (placeholder == '' ? '' : ' ' + placeholder));
             }
           } else {
             this.reset();
@@ -1476,7 +1477,8 @@ window.$K = (function () {
           forEach(elements, function () {
             var title, val = this.element.value;
             if (this.required !== null && val == '') {
-              title = this.title !== '' ? this.title : trans('Please fill in');
+              var placeholder = this.element.placeholder;
+              title = this.title !== '' ? this.title : trans('Please fill in') + (placeholder == '' ? '' : ' ' + placeholder);
               alert(title);
               this.element.addClass('required').highlight().focus();
               ret = false;

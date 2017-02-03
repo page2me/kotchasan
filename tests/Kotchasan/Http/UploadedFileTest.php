@@ -7,88 +7,86 @@ namespace Kotchasan\Http;
  */
 class UploadedFileTest extends \PHPUnit_Framework_TestCase
 {
-	static private $filename = './phpUploadedFileTest';
+  static private $filename = './phpUploadedFileTest';
 
-	/**
-	 * @beforeClass
-	 */
-	public static function setUpBeforeClass()
-	{
-		$fh = fopen(self::$filename, "w");
-		fwrite($fh, "12345678");
-		fclose($fh);
-	}
+  /**
+   * @beforeClass
+   */
+  public static function setUpBeforeClass()
+  {
+    $fh = fopen(self::$filename, "w");
+    fwrite($fh, "12345678");
+    fclose($fh);
+  }
 
-	/**
-	 * @afterClass
-	 */
-	public static function tearDownAfterClass()
-	{
-		if (file_exists(self::$filename)) {
-			unlink(self::$filename);
-		}
-	}
+  /**
+   * @afterClass
+   */
+  public static function tearDownAfterClass()
+  {
+    if (file_exists(self::$filename)) {
+      unlink(self::$filename);
+    }
+  }
 
-	public function testConstructor()
-	{
-		$attr = array(
-			'tmp_name' => self::$filename,
-			'name' => 'my-avatar.txt',
-			'type' => 'text/plain',
-			'size' => 8,
-			'error' => 0
-		);
-		$uploadedFile = new UploadedFile($attr['tmp_name'], $attr['name'], $attr['type'], $attr['size'], $attr['error'], false);
-		$this->assertEquals($attr['name'], $uploadedFile->getClientFilename());
-		$this->assertEquals($attr['type'], $uploadedFile->getClientMediaType());
-		$this->assertEquals($attr['size'], $uploadedFile->getSize());
-		$this->assertEquals($attr['error'], $uploadedFile->getError());
-		$this->assertEquals('txt', $uploadedFile->getClientFileExt());
-		$this->assertTrue($uploadedFile->validFileExt(array('txt')));
-		$this->assertFalse($uploadedFile->validFileExt(array('jpg')));
-		return $uploadedFile;
-	}
+  public function testConstructor()
+  {
+    $attr = array(
+      'tmp_name' => self::$filename,
+      'name' => 'my-avatar.txt',
+      'type' => 'text/plain',
+      'size' => 8,
+      'error' => 0
+    );
+    $uploadedFile = new UploadedFile($attr['tmp_name'], $attr['name'], $attr['type'], $attr['size'], $attr['error'], false);
+    $this->assertEquals($attr['name'], $uploadedFile->getClientFilename());
+    $this->assertEquals($attr['type'], $uploadedFile->getClientMediaType());
+    $this->assertEquals($attr['size'], $uploadedFile->getSize());
+    $this->assertEquals($attr['error'], $uploadedFile->getError());
+    $this->assertEquals('txt', $uploadedFile->getClientFileExt());
+    $this->assertTrue($uploadedFile->validFileExt(array('txt')));
+    $this->assertFalse($uploadedFile->validFileExt(array('jpg')));
+    return $uploadedFile;
+  }
 
-	/**
-	 * @depends testConstructor
-	 * @param UploadedFile $uploadedFile
-	 * @return UploadedFile
-	 */
-	public function testGetStream(UploadedFile $uploadedFile)
-	{
-		$stream = $uploadedFile->getStream();
-		$this->assertEquals(true, $uploadedFile->getStream() instanceof Stream);
-		$stream->close();
-		return $uploadedFile;
-	}
+  /**
+   * @depends testConstructor
+   * @param UploadedFile $uploadedFile
+   * @return UploadedFile
+   */
+  public function testGetStream(UploadedFile $uploadedFile)
+  {
+    $stream = $uploadedFile->getStream();
+    $this->assertEquals(true, $uploadedFile->getStream() instanceof Stream);
+    $stream->close();
+    return $uploadedFile;
+  }
 
-	/**
-	 * @depends testConstructor
-	 * @param UploadedFile $uploadedFile
-	 * @return UploadedFile
-	 */
-	public function testCopyTo(UploadedFile $uploadedFile)
-	{
-		$tempName = uniqid('file-');
-		$path = sys_get_temp_dir().DIRECTORY_SEPARATOR.$tempName;
-		$uploadedFile->copyTo($path);
-		$this->assertFileExists($path);
-		unlink($path);
-		return $uploadedFile;
-	}
+  /**
+   * @depends testConstructor
+   * @param UploadedFile $uploadedFile
+   * @return UploadedFile
+   */
+  public function testCopyTo(UploadedFile $uploadedFile)
+  {
+    $path = sys_get_temp_dir().DIRECTORY_SEPARATOR.uniqid('file-');
+    $uploadedFile->copyTo($path);
+    $this->assertFileExists($path);
+    unlink($path);
+    return $uploadedFile;
+  }
 
-	/**
-	 * @depends testConstructor
-	 * @param UploadedFile $uploadedFile
-	 * @return UploadedFile
-	 */
-	public function testMoveTo(UploadedFile $uploadedFile)
-	{
-		$tempName = uniqid('file-');
-		$path = sys_get_temp_dir().DIRECTORY_SEPARATOR.$tempName;
-		$uploadedFile->moveTo($path);
-		$this->assertFileExists($path);
-		unlink($path);
-		return $uploadedFile;
-	}
+  /**
+   * @depends testConstructor
+   * @param UploadedFile $uploadedFile
+   * @return UploadedFile
+   */
+  public function testMoveTo(UploadedFile $uploadedFile)
+  {
+    $path = sys_get_temp_dir().DIRECTORY_SEPARATOR.uniqid('file-');
+    $uploadedFile->moveTo($path);
+    $this->assertFileExists($path);
+    unlink($path);
+    return $uploadedFile;
+  }
 }

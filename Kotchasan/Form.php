@@ -224,7 +224,7 @@ class Form extends \Kotchasan\KBase
         $input .= '<span class=label>'.$unit.'</span></div>';
       }
       if (!empty($comment)) {
-        $input .= '<div class="comment"'.(empty($id) ? '' : ' id="result_'.$id.'"').'>'.$comment.'</div></div>';
+        $input .= '<div class="comment"'.(empty($id) ? '' : ' id="result_'.$id.'"').'>'.$comment.'</div>';
       }
     } else {
       if (!empty($unit)) {

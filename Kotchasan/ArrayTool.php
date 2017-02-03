@@ -162,20 +162,21 @@ class ArrayTool
 
   /**
    * ลบรายการที่ id สามารถลบได้หลายรายการโดยคั่นแต่ละรายการด้วย ,
+   * รักษาคีย์ของรายการเดิมไว้
    *
    * @param array $array
-   * @param string|int $ids รายการที่ต้องการลบ 1 หรือ 1,2,3
+   * @param string $ids รายการที่ต้องการลบ 1 หรือ 1,2,3
    * @return array คืนค่า array ใหม่หลังจากลบแล้ว
    *
-   * @assert (array(0, 1, 2, 3, 4, 5), '0,2') [==] array(1, 3, 4, 5)
+   * @assert (array(0, 1, 2, 3, 4, 5), '0,2') [==] array(1 => 1, 3 => 3, 4 => 4, 5 => 5)
    */
   public static function delete($array, $ids)
   {
     $temp = array();
     $ids = explode(',', $ids);
-    foreach ($array as $id => $items) {
-      if (!in_array($id, $ids)) {
-        $temp[] = $items;
+    foreach ($array as $k => $v) {
+      if (!in_array($k, $ids)) {
+        $temp[$k] = $v;
       }
     }
     return $temp;
@@ -337,6 +338,29 @@ class ArrayTool
     }
     if ($find !== null) {
       $result[$key] = $value;
+    }
+    return $result;
+  }
+
+  /**
+   * ตัดแอเรย์ตั้งแต่เริ่มต้นจนถึงตำแหน่งที่กำหนด
+   *
+   * @param array $source แอเรย์ต้นฉบับ
+   * @param string|int $key คีย์ของ $source ตำแหน่งที่ต้องการตัด
+   * @return array คืนค่าแอเรย์ถัดจากรายการที่ตัด ไม่พบคืนค่าเดิม
+   *
+   * @assert (array('one' => 1, 'two' => 2, 'three' => 3), 'two') [==] array('three' => 3)
+   * @assert (array('one' => 1, 'two' => 2, 'three' => 3), 1) [==] array('one' => 1, 'two' => 2, 'three' => 3)
+   */
+  public static function shift($source, $key)
+  {
+    $result = array();
+    foreach ($source as $k => $v) {
+      if ($k == $key) {
+        $result = array();
+      } else {
+        $result[$k] = $v;
+      }
     }
     return $result;
   }

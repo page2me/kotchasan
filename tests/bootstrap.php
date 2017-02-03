@@ -8,8 +8,9 @@
  * @license http://www.kotchasan.com/license/
  */
 $_SERVER['HTTP_HOST'] = 'localhost';
+$_SERVER['DOCUMENT_ROOT'] = dirname(dirname(__FILE__)).'/';
 // ตัวแปรที่จำเป็นสำหรับ Framework ใช้ระบุ root folder
-define('ROOT_PATH', dirname(dirname(__FILE__)).'/');
+define('ROOT_PATH', $_SERVER['DOCUMENT_ROOT']);
 // ตัวแปรที่จำเป็นสำหรับ Framework ใช้ระบุ root folder
 define('BASE_PATH', '/');
 // load Kotchasan
