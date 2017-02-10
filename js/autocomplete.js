@@ -43,18 +43,21 @@
       display.className = options.className;
       display.style.left = '-100000px';
       display.style.position = 'absolute';
-      display.style.display = 'table';
+      display.style.display = 'block';
       display.style.zIndex = 9999;
       function _movehighlight(id) {
         listindex = Math.max(0, id);
         listindex = Math.min(list.length - 1, listindex);
-        forEach(list, function (item, index) {
+        var selItem = null;
+        forEach(list, function () {
           if (listindex == this.itemindex) {
-            item.addClass('select');
+            this.addClass('select');
+            selItem = this;
           } else {
-            item.removeClass('select');
+            this.removeClass('select');
           }
         });
+        return selItem;
       }
       function onSelect() {
         if (showing) {
@@ -75,7 +78,8 @@
       function _populateitems(datas) {
         display.innerHTML = '';
         list = new Array();
-        var f, ret = options.prepare.call(datas);
+        var f,
+          ret = options.prepare.call(datas);
         if (ret && ret != '') {
           var p = ret.toDOM();
           display.appendChild(p);
@@ -101,7 +105,7 @@
         display.style.left = '-100000px';
         showing = false;
       }
-      var _dokeyup = function () {
+      var _search = function () {
         window.clearTimeout(self.timer);
         req.abort();
         if (!cancleEvent) {
@@ -125,6 +129,7 @@
                   }
                   display.style.left = input.getLeft() + 'px';
                   display.style.top = (input.getTop() + input.getHeight() + 5) + 'px';
+                  display.style.width = input.getWidth() + 'px';
                   showing = true;
                 } else {
                   _hide();
@@ -137,13 +142,24 @@
         }
         cancleEvent = false;
       };
+      function _showitem(item) {
+        if (item) {
+          var top = item.getTop() - display.getTop();
+          var height = display.getHeight();
+          if (top < display.scrollTop) {
+            display.scrollTop = top;
+          } else if (top > height) {
+            display.scrollTop = top - height + item.getHeight();
+          }
+        }
+      }
       function _dokeydown(evt) {
         var key = GEvent.keyCode(evt);
         if (key == 40) {
-          _movehighlight(listindex + 1);
+          _showitem(_movehighlight(listindex + 1));
           cancleEvent = true;
         } else if (key == 38) {
-          _movehighlight(listindex - 1);
+          _showitem(_movehighlight(listindex - 1));
           cancleEvent = true;
         } else if (key == 13) {
           cancleEvent = true;
@@ -154,12 +170,18 @@
             }
           });
           options.onSuccess.call(input);
+        } else if (key == 32) {
+          if (this.value == '') {
+            _search();
+            cancleEvent = true;
+          }
         }
         if (cancleEvent) {
           GEvent.stop(evt);
         }
       }
-      input.addEvent('keyup', _dokeyup);
+      input.addEvent('click', _search);
+      input.addEvent('keyup', _search);
       input.addEvent('keydown', _dokeydown);
       input.addEvent('blur', function () {
         _hide();

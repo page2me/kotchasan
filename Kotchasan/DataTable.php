@@ -408,7 +408,7 @@ class DataTable extends \Kotchasan\KBase
     }
     if ($this->model) {
       if (!empty($qs)) {
-        $this->model->where($qs);
+        $this->model->andWhere($qs);
       }
     }
     // ปุ่ม Go

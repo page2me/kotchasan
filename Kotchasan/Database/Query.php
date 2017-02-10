@@ -36,7 +36,7 @@ abstract class Query extends \Kotchasan\Database\Db
    * @param string $alias ชื่อของผลลัพท์ ถ้าไม่ระบุจะเป็นชื่อเดียวกับชื่อฟิลด์
    * @return string SQL Command
    */
-  public function buildNext($field, $table, $condition = null, $alias = null)
+  public function buildNext($field, $table, $condition = null, $alias = '')
   {
     return $this->db->buildNext($field, $this->getFullTableName($table), $condition, $alias);
   }
@@ -146,7 +146,7 @@ abstract class Query extends \Kotchasan\Database\Db
   /**
    * ฟังก์ชั่นสร้าง query string สำหรับคำสั่ง SELECT
    *
-   * @param string $fields
+   * @param string|array|QueryBuilder $fields
    * @return string
    */
   protected function buildSelect($fields)
@@ -166,6 +166,9 @@ abstract class Query extends \Kotchasan\Database\Db
         }
         $ret = implode(', ', $rets);
       }
+    } elseif ($fields instanceof QueryBuilder) {
+      // QueryBuilder
+      $ret = '('.$fields->text().')';
     } else {
       if ($fields == '*') {
         $ret = '*';

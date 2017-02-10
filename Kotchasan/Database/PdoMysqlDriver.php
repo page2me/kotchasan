@@ -157,25 +157,83 @@ class PdoMysqlDriver extends Driver
   }
 
   /**
-   * ฟังก์ชั่นเพิ่มข้อมูลใหม่ลงในตาราง
+   * ฟังก์ชั่นสร้างคำสั่ง SQL สำหรับการ INSERT ข้อมูล
    *
-   * @param string $table_name ชื่อตาราง
    * @param array|object $save ข้อมูลที่ต้องการบันทึก รูปแบบ array('key1'=>'value1', 'key2'=>'value2', ...)
-   * @return int|bool สำเร็จ คืนค่า id ที่เพิ่ม ผิดพลาด คืนค่า false
+   * @param array $params ตัวแปร Array สำหรับรับค่า params ส่งให้ execute
+   * @return string
    */
-  public function insert($table_name, $save)
+  private function makeInsert($save, &$params)
   {
     $keys = array();
     $values = array();
     foreach ($save as $key => $value) {
       $keys[] = $key;
-      $values[':'.$key] = $value;
+      if (strpos($value, '(') !== false) {
+        $values[] = $value;
+      } else {
+        $values[] = ':'.$key;
+        $params[':'.$key] = $value;
+      }
     }
-    $sql = 'INSERT INTO '.$table_name.' (`'.implode('`,`', $keys);
-    $sql .= '`) VALUES (:'.implode(',:', $keys).')';
+    return 'INSERT INTO '.$table_name.' (`'.implode('`,`', $keys).'`) VALUES ('.implode(',', $values).')';
+  }
+
+  /**
+   * ฟังก์ชั่นเพิ่มข้อมูลใหม่ลงในตาราง
+   *
+   * @param string $table_name ชื่อตาราง
+   * @param array|object $save ข้อมูลที่ต้องการบันทึก รูปแบบ array('key1'=>'value1', 'key2'=>'value2', ...)
+   * @return int|null สำเร็จ คืนค่า id ที่เพิ่ม ผิดพลาด คืนค่า null
+   */
+  public function insert($table_name, $save)
+  {
+    $params = array();
+    $sql = $this->makeInsert($save, $params);
     try {
       $query = $this->connection->prepare($sql);
-      $query->execute($values);
+      $query->execute($params);
+      $this->log(__FUNCTION__, $sql, $values);
+      self::$query_count++;
+      return (int)$this->connection->lastInsertId();
+    } catch (PDOException $e) {
+      throw new Exception($e->getMessage(), 500, $e);
+    }
+  }
+
+  /**
+   * ฟังก์ชั่นเพิ่มข้อมูลใหม่ลงในตาราง
+   * ถ้ามีข้อมูลเดิมอยู่แล้วจะเป็นการอัปเดท
+   * (ข้อมูลเดิมตาม KEY ที่เป็น UNIQUE)
+   *
+   * @param string $table_name ชื่อตาราง
+   * @param array|object $save ข้อมูลที่ต้องการบันทึก รูปแบบ array('key1'=>'value1', 'key2'=>'value2', ...)
+   * @param array|object $update ข้อมูลหากเป็นการอัปเดท, ไม่ต้องระบุหากเป็นการใช้ค่าเดิม
+   * @return int|null insert คืนค่า id ที่เพิ่ม, update คืนค่า 0, ผิดพลาด คืนค่า null
+   */
+  public function insertOrUpdate($table_name, $save, $update = array())
+  {
+    $updates = array();
+    if (empty($update)) {
+      foreach ($save as $key => $value) {
+        $updates[] = '`'.$key.'`=VALUES(`'.$key.'`)';
+      }
+    } else {
+      foreach ($save as $key => $value) {
+        if (strpos($value, '(') !== false) {
+          $updates[] = '`'.$key.'`='.$value;
+        } else {
+          $updates[] = ':u'.$key;
+          $params[':u'.$key] = $value;
+        }
+      }
+    }
+    $params = array();
+    $sql = $this->makeInsert($save, $params);
+    $sql .= ' ON DUPLICATE KEY UPDATE '.implode(', ', $updates);
+    try {
+      $query = $this->connection->prepare($sql);
+      $query->execute($params);
       $this->log(__FUNCTION__, $sql, $values);
       self::$query_count++;
       return (int)$this->connection->lastInsertId();
@@ -191,7 +249,7 @@ class PdoMysqlDriver extends Driver
    * @return string sql command
    *
    * @assert (array('update' => '`user`', 'where' => '`id` = 1', 'set' => array('`id` = 1', "`email` = 'admin@localhost'"))) [==] "UPDATE `user` SET `id` = 1, `email` = 'admin@localhost' WHERE `id` = 1"
-   * @assert (array('insert' => '`user`', 'values' => array('id' => 1, 'email' => 'admin@localhost'))) [==] "INSERT INTO `user` (`id`, `email`) VALUES (:id, :email)"
+   * @assert (array('insert' => '`user`', 'keys' => array('id' => ':id', 'email' => ':email'))) [==] "INSERT INTO `user` (`id`, `email`) VALUES (:id, :email)"
    * @assert (array('select'=>'*', 'from'=>'`user`','where'=>'`id` = 1', 'order' => '`id`', 'start' => 1, 'limit' => 10, 'join' => array(" INNER JOIN ..."))) [==] "SELECT * FROM `user` INNER JOIN ... WHERE `id` = 1 ORDER BY `id` LIMIT 1,10"
    * @assert (array('select'=>'*', 'from'=>'`user`','where'=>'`id` = 1', 'order' => '`id`', 'start' => 1, 'limit' => 10, 'group' => '`id`')) [==] "SELECT * FROM `user` WHERE `id` = 1 GROUP BY `id` ORDER BY `id` LIMIT 1,10"
    * @assert (array('delete' => '`user`', 'where' => '`id` = 1')) [==] "DELETE FROM `user` WHERE `id` = 1"
@@ -200,9 +258,12 @@ class PdoMysqlDriver extends Driver
   {
     $sql = '';
     if (isset($sqls['insert'])) {
-      $keys = array_keys($sqls['values']);
+      $keys = array_keys($sqls['keys']);
       $sql = 'INSERT INTO '.$sqls['insert'].' (`'.implode('`, `', $keys);
-      $sql .= "`) VALUES (:".implode(", :", $keys).")";
+      $sql .= "`) VALUES (".implode(", ", $sqls['keys']).")";
+      if (isset($sqls['orupdate'])) {
+        $sql .= ' ON DUPLICATE KEY UPDATE '.implode(', ', $sqls['orupdate']);
+      }
     } elseif (isset($sqls['union'])) {
       $sql = '('.implode(') UNION (', $sqls['union']).')';
     } else {
@@ -254,16 +315,23 @@ class PdoMysqlDriver extends Driver
    * @param string $alias ชื่อของผลลัพท์ ถ้าไม่ระบุจะเป็นชื่อเดียวกับชื่อฟิลด์
    * @return string SQL Command
    *
-   * @assert ('id', '`world`', array(array('module_id', 'D.id'))) [==] '(1 + IFNULL((SELECT MAX(`id`) FROM `world` WHERE `module_id` = D.`id`), 0)) AS `id`'
+   * @assert ('id', '`world`', array(array('module_id', 'D.id'))) [==] '(1 + IFNULL((SELECT MAX(`id`) FROM `world` AS X WHERE `module_id` = D.`id`), 0)) AS `id`'
+   * @assert ('id', '`world`', array(array('module_id', 'D.id')), false) [==] '(1 + IFNULL((SELECT MAX(`id`) FROM `world` AS X WHERE `module_id` = D.`id`), 0)) AS `id`'
+   * @assert ('id', '`world`', array(array('module_id', 'D.id')), 'next_id') [==] '(1 + IFNULL((SELECT MAX(`id`) FROM `world` AS X WHERE `module_id` = D.`id`), 0)) AS `next_id`'
+   * @assert ('id', '`world`', array(array('module_id', 'D.id')), null) [==] '(1 + IFNULL((SELECT MAX(`id`) FROM `world` AS X WHERE `module_id` = D.`id`), 0))'
    */
-  public function buildNext($field, $table_name, $condition = null, $alias = null)
+  public function buildNext($field, $table_name, $condition = null, $alias = '')
   {
     if (empty($condition)) {
       $condition = '';
     } else {
       $condition = ' WHERE '.$this->buildWhere($condition);
     }
-    return '(1 + IFNULL((SELECT MAX(`'.$field.'`) FROM '.$table_name.$condition.'), 0)) AS `'.($alias ? $alias : $field).'`';
+    $q = '(1 + IFNULL((SELECT MAX(`'.$field.'`) FROM '.$table_name.' AS X'.$condition.'), 0))';
+    if ($alias !== null) {
+      $q .= ' AS `'.(empty($alias) ? $field : $alias).'`';
+    }
+    return $q;
   }
 
   /**

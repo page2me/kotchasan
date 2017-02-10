@@ -53,10 +53,6 @@ class Email extends \Kotchasan\Model
         $headers .= "Content-type: text/html; charset=".strtoupper($charset)."\r\n";
         $headers .= "From: ".strip_tags($replyto[1])."\r\n";
         $headers .= "Reply-to: $replyto[0]\r\n";
-        if (function_exists('imap_8bit')) {
-          $subject = "=?$charset?Q?".imap_8bit($subject)."?=";
-          $msg = imap_8bit($msg);
-        }
         if (!@mail($email, $subject, $msg, $headers)) {
           $messages = array(Language::get('Unable to send mail'));
         }
@@ -84,6 +80,15 @@ class Email extends \Kotchasan\Model
       if (!empty(self::$cfg->email_Port)) {
         $mail->Port = self::$cfg->email_Port;
       }
+      $mail->smtpConnect(
+        array(
+          "ssl" => array(
+            "verify_peer" => false,
+            "verify_peer_name" => false,
+            "allow_self_signed" => true
+          )
+        )
+      );
       $mail->AddReplyTo($replyto[0], $replyto[1]);
       if ($mail->ValidateAddress(self::$cfg->noreply_email)) {
         $mail->SetFrom(self::$cfg->noreply_email, strip_tags(self::$cfg->web_title));

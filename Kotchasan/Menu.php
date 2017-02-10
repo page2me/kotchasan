@@ -50,7 +50,6 @@ class Menu
    */
   protected static function getItem($name, $item, $arrow, $select)
   {
-
     if (empty($name) && !is_int($name)) {
       $c = '';
     } else {
