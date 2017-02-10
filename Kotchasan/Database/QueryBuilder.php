@@ -243,6 +243,7 @@ class QueryBuilder extends \Kotchasan\Database\Query
 
   /**
    * ฟังก์ชั่นสร้างคำสั่ง INSERT INTO
+   * สามารถกำหนดค่า value เป็น query string ได้
    *
    * @param string $table ชื่อตาราง
    * @param array $datas รูปแบบ array(key1=>value1, key2=>value2)
@@ -256,11 +257,11 @@ class QueryBuilder extends \Kotchasan\Database\Query
     $this->sqls['function'] = 'query';
     $this->sqls['insert'] = $this->getFullTableName($table);
     foreach ($datas as $key => $value) {
-      if (strpos($value, '(') === false) {
+      if ($value[0] == '(' && $value[strlen($value) - 1] == ')') {
+        $this->sqls['keys'][$key] = $value;
+      } else {
         $this->sqls['keys'][$key] = ':'.$key;
         $this->sqls['values'][':'.$key] = $value;
-      } else {
-        $this->sqls['keys'][$key] = $value;
       }
     }
     return $this;

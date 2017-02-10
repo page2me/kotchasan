@@ -159,22 +159,19 @@ class PdoMysqlDriver extends Driver
   /**
    * ฟังก์ชั่นสร้างคำสั่ง SQL สำหรับการ INSERT ข้อมูล
    *
+   * @param string $table_name ชื่อตาราง
    * @param array|object $save ข้อมูลที่ต้องการบันทึก รูปแบบ array('key1'=>'value1', 'key2'=>'value2', ...)
    * @param array $params ตัวแปร Array สำหรับรับค่า params ส่งให้ execute
    * @return string
    */
-  private function makeInsert($save, &$params)
+  private function makeInsert($table_name, $save, &$params)
   {
     $keys = array();
     $values = array();
     foreach ($save as $key => $value) {
       $keys[] = $key;
-      if (strpos($value, '(') !== false) {
-        $values[] = $value;
-      } else {
-        $values[] = ':'.$key;
-        $params[':'.$key] = $value;
-      }
+      $values[] = ':'.$key;
+      $params[':'.$key] = $value;
     }
     return 'INSERT INTO '.$table_name.' (`'.implode('`,`', $keys).'`) VALUES ('.implode(',', $values).')';
   }
@@ -189,11 +186,11 @@ class PdoMysqlDriver extends Driver
   public function insert($table_name, $save)
   {
     $params = array();
-    $sql = $this->makeInsert($save, $params);
+    $sql = $this->makeInsert($table_name, $save, $params);
     try {
       $query = $this->connection->prepare($sql);
       $query->execute($params);
-      $this->log(__FUNCTION__, $sql, $values);
+      $this->log(__FUNCTION__, $sql, $params);
       self::$query_count++;
       return (int)$this->connection->lastInsertId();
     } catch (PDOException $e) {
@@ -220,16 +217,12 @@ class PdoMysqlDriver extends Driver
       }
     } else {
       foreach ($save as $key => $value) {
-        if (strpos($value, '(') !== false) {
-          $updates[] = '`'.$key.'`='.$value;
-        } else {
-          $updates[] = ':u'.$key;
-          $params[':u'.$key] = $value;
-        }
+        $updates[] = ':u'.$key;
+        $params[':u'.$key] = $value;
       }
     }
     $params = array();
-    $sql = $this->makeInsert($save, $params);
+    $sql = $this->makeInsert($table_name, $save, $params);
     $sql .= ' ON DUPLICATE KEY UPDATE '.implode(', ', $updates);
     try {
       $query = $this->connection->prepare($sql);
@@ -250,6 +243,7 @@ class PdoMysqlDriver extends Driver
    *
    * @assert (array('update' => '`user`', 'where' => '`id` = 1', 'set' => array('`id` = 1', "`email` = 'admin@localhost'"))) [==] "UPDATE `user` SET `id` = 1, `email` = 'admin@localhost' WHERE `id` = 1"
    * @assert (array('insert' => '`user`', 'keys' => array('id' => ':id', 'email' => ':email'))) [==] "INSERT INTO `user` (`id`, `email`) VALUES (:id, :email)"
+   * @assert (array('insert' => '`user`', 'keys' => array('id' => ':id'), 'orupdate' => array('`id`=VALUES(`id`)'))) [==] "INSERT INTO `user` (`id`) VALUES (:id) ON DUPLICATE KEY UPDATE `id`=VALUES(`id`)"
    * @assert (array('select'=>'*', 'from'=>'`user`','where'=>'`id` = 1', 'order' => '`id`', 'start' => 1, 'limit' => 10, 'join' => array(" INNER JOIN ..."))) [==] "SELECT * FROM `user` INNER JOIN ... WHERE `id` = 1 ORDER BY `id` LIMIT 1,10"
    * @assert (array('select'=>'*', 'from'=>'`user`','where'=>'`id` = 1', 'order' => '`id`', 'start' => 1, 'limit' => 10, 'group' => '`id`')) [==] "SELECT * FROM `user` WHERE `id` = 1 GROUP BY `id` ORDER BY `id` LIMIT 1,10"
    * @assert (array('delete' => '`user`', 'where' => '`id` = 1')) [==] "DELETE FROM `user` WHERE `id` = 1"
