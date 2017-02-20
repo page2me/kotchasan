@@ -71,8 +71,8 @@
       return this;
     },
     location: function (url) {
-      var locs = window.location.toString().split('#');
-      var ret = this.geturl.call(this, url);
+      var locs = window.location.toString().split('#'),
+        ret = this.geturl.call(this, url);
       if (ret) {
         ret.push(new Date().getTime());
         window.location = locs[0] + '#' + decodeURIComponent(ret.join('&'));
@@ -87,6 +87,22 @@
         window.location = WEB_URL + 'index.php?' + this.myhistory[this.myhistory.length - 2];
       } else {
         window.history.go(-1);
+      }
+    },
+    reload: function () {
+      var locs = window.location.toString().split('#');
+      if (locs.length == 1) {
+        window.location.reload();
+      } else {
+        var patt = /[0-9]+/,
+          ret = new Array();
+        forEach(locs[1].split('&'), function () {
+          if (this != 'action=logout' && this != 'action=login' && !patt.test(this)) {
+            ret.push(this);
+          }
+        });
+        ret.push(new Date().getTime());
+        window.location = locs[0] + '#' + decodeURIComponent(ret.join('&'));
       }
     }
   };

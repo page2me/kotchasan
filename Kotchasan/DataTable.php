@@ -612,7 +612,7 @@ class DataTable extends \Kotchasan\KBase
         $tfoot .= '<td colspan="'.($colCount - $this->checkCol - 1).'"></td>';
         $tfoot .= '</tr>';
       }
-      if ($tfoot) {
+      if (!empty($tfoot)) {
         $content[] = '<tfoot>'.$tfoot.'</tfoot>';
       }
       $content[] = '</table></div>';

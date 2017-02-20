@@ -206,7 +206,7 @@ class InputItem
    */
   public function topic()
   {
-    return trim(preg_replace('/[\r\n\t\s]+/', ' ', $this->htmlspecialchars()));
+    return trim(preg_replace('/[\r\n\s\t]+/', ' ', $this->htmlspecialchars()));
   }
 
   /**
@@ -289,23 +289,24 @@ class InputItem
    * @param int $len ความยาวของ description 0 หมายถึงคืนค่าทั้งหมด
    * @return string
    *
-   * @assert create('ทด\/สอบ<?php echo "555"?>')->description() [==] 'ทด สอบ'
-   * @assert create('ทด\/สอบ<style>body {color: red}</style>')->description() [==] 'ทด สอบ'
-   * @assert create('ทด\/สอบ<b>ตัวหนา</b>')->description() [==] 'ทด สอบตัวหนา'
-   * @assert create('ทด\/สอบ{LNG_Language name}')->description() [==] 'ทด สอบ'
-   * @assert create('ทด\/สอบ[code]ตัวหนา[/code]')->description() [==] 'ทด สอบ'
-   * @assert create('ทด\/สอบ[b]ตัวหนา[/b]')->description() [==] 'ทด สอบตัวหนา'
-   * @assert create('ท&amp;ด&quot;\&nbsp;/__ส-อ+บ')->description() [==] 'ท ด ส อ บ'
+   * @assert create("ท.ด(ส     )อ\"บ'\r\n\t<?php echo '555'?>")->description() [==] 'ท.ด(ส )อ บ'
+   * @assert create('ทดสอบ<style>body {color: red}</style>')->description() [==] 'ทดสอบ'
+   * @assert create('ทดสอบ<b>ตัวหนา</b>')->description() [==] 'ทดสอบตัวหนา'
+   * @assert create('ทดสอบ{LNG_Language name}')->description() [==] 'ทดสอบ'
+   * @assert create('ทดสอบ[code]ตัวหนา[/code]')->description() [==] 'ทดสอบ'
+   * @assert create('ทดสอบ[b]ตัวหนา[/b]')->description() [==] 'ทดสอบตัวหนา'
+   * @assert create('2 > 1 < 3 > 2{WIDGET_XXX}')->description() [==] '2 > 1 < 3 > 2'
+   * @assert create('ทดสอบ<!--WIDGET_XXX-->')->description() [==] 'ทดสอบ'
+   * @assert create('ท&amp;ด&quot;\&nbsp;/__ส-อ+บ')->description() [==] 'ท ด \ /__ส-อ+บ'
+   * @assert create('ภาคภูมิ')->description(2) [==] 'ภา'
    */
   public function description($len = 0)
   {
     $patt = array(
       /* style */
-      '@<style[^>]*?>.*?</style>@siu' => '',
-      /* comment */
-      '@<![\s\S]*?--[ \t\n\r]*>@u' => '',
+      '@<(script|style)[^>]*?>.*?</\\1>@isu' => '',
       /* tag */
-      '@<[\/\!]*?[^<>]*?>@iu' => '',
+      '@<[a-z\/\!\?][^>]{0,}>@isu' => '',
       /* keywords */
       '/{(WIDGET|LNG)_[\w\s\.\-\'\(\),%\/:&\#;]+}/su' => '',
       /* BBCode (code) */
@@ -313,7 +314,7 @@ class InputItem
       /* BBCode ทั่วไป [b],[i] */
       '/\[([a-z]+)([\s=].*)?\](.*?)\[\/\\1\]/ui' => '\\3',
       /* ตัวอักษรที่ไม่ต้องการ */
-      '/(&rdquo;|&quot;|&nbsp;|&amp;|[_\(\)\-\+\r\n\s\"\'”<>\.\/\\\?&\{\}]){1,}/isu' => ' '
+      '/(&rdquo;|&quot;|&nbsp;|&amp;|[\r\n\s\t\"\']){1,}/isu' => ' '
     );
     $text = trim(preg_replace(array_keys($patt), array_values($patt), $this->value));
     return $this->cut($text, $len);
@@ -344,7 +345,7 @@ class InputItem
    */
   public function keywords($len = 0)
   {
-    $text = trim(preg_replace('/[_\(\)\-\+\r\n\s\"\'”<>\.\/\\\?&\{\}]{1,}/isu', ' ', strip_tags($this->value)));
+    $text = trim(preg_replace('/[\r\n\s\t\"\'<>]{1,}/isu', ' ', strip_tags($this->value)));
     return $this->cut($text, $len);
   }
 

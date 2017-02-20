@@ -21,7 +21,7 @@
       this.options = {
         type: 'line',
         rows: 5,
-        colors: ['#438AEF', '#FBB242', '#DE4210', '#0E6390', '#BDBDBD', '#1F3D68', '#FEE280', '#1A9ADC', '#C86A4C', '#055CDA', '#F2D086', '#51627F', '#F0B7A6', '#DE8210', '#7791BC'],
+        colors: ['#438AEF', '#FBB242', '#DE4210', '#259B24', '#E91E63', '#1F3D68', '#FEE280', '#1A9ADC', '#C86A4C', '#055CDA', '#F2D086', '#51627F', '#F0B7A6', '#DE8210', '#7791BC'],
         startColor: 0,
         backgroundColor: 'auto',
         shadowColor: 'rgba(0,0,0,0.3)',
@@ -29,7 +29,7 @@
         gridHColor: '#CDCDCD',
         gridVColor: '#CDCDCD',
         showTitle: true,
-        lineWidth: 3,
+        lineWidth: 2,
         pieMargin: 10,
         centerX: null,
         centerY: null,
@@ -55,8 +55,10 @@
       }
       this.datas = new Object();
       var datas = new Array();
-      forEach(this.graphs.getElementsByTagName('thead')[0].getElementsByTagName('td'), function () {
-        datas.push(this.innerHTML.strip_tags());
+      forEach(this.graphs.getElementsByTagName('thead')[0].getElementsByTagName('th'), function (item, index) {
+        if (index > 0) {
+          datas.push(item.innerHTML.strip_tags());
+        }
       });
       this.subtitle = this.graphs.getElementsByTagName('thead')[0].getElementsByTagName('th')[0].innerHTML.strip_tags().trim();
       this.subtitle = this.subtitle == '' ? '' : this.subtitle + ' ';
@@ -64,12 +66,13 @@
       this.max = 0;
       var rows = new Array();
       forEach(this.graphs.getElementsByTagName('tbody')[0].getElementsByTagName('tr'), function () {
-        var datas = new Array();
-        var d = new Object();
-        var val, max = 0,
+        var val,
+          datas = new Array(),
+          d = new Object(),
+          max = 0,
           sum = 0;
         forEach(this.getElementsByTagName('td'), function () {
-          var val = new Object();
+          val = new Object();
           if (this.dataset.value) {
             val.value = floatval(this.dataset.value);
           } else {
@@ -217,7 +220,7 @@
       var clientHeight = b - t;
       var o = options.lineWidth + 2;
       forEach(this.datas.rows, function (rows, row) {
-        forEach(this.items, function (item, index) {
+        forEach(rows.items, function (item, index) {
           item.cx = (index * cellWidth) + l;
           item.cy = clientHeight + t - Math.floor((clientHeight * item.value) / self.max);
           item.x = item.cx - o;
@@ -287,20 +290,11 @@
         context.lineTo(l, t);
         context.stroke();
         context.closePath();
-        var xp, yp, sw;
+        var xp, yp;
         context.lineWidth = Math.max(1, options.lineWidth);
         forEach(self.datas.rows, function (rows, row) {
           forEach(this.items, function (item, index) {
             if (index > 0) {
-              if (item.cy < yp) {
-                sw = (options.lineWidth < 2 || (yp - item.cy) < cellHeight) ? 1 : 2;
-                context.strokeStyle = options.shadowColor;
-                context.beginPath();
-                context.moveTo(xp, yp + 1);
-                context.lineTo(item.cx, item.cy + 1);
-                context.stroke();
-                context.closePath();
-              }
               context.strokeStyle = options.colors[row % options.colors.length];
               context.beginPath();
               context.moveTo(xp, yp);
@@ -311,14 +305,14 @@
             xp = item.cx;
             yp = item.cy;
           });
-          forEach(this.items, function (item, index) {
+          forEach(this.items, function () {
             context.fillStyle = options.colors[row % options.colors.length];
             context.beginPath();
-            context.arc(item.cx, item.cy, options.lineWidth + 3, 0, Math.PI * 2, true);
+            context.arc(this.cx, this.cy, options.lineWidth + 3, 0, Math.PI * 2, true);
             context.fill();
             context.fillStyle = self.backgroundColor;
             context.beginPath();
-            context.arc(item.cx, item.cy, 3, 0, Math.PI * 2, true);
+            context.arc(this.cx, this.cy, 3, 0, Math.PI * 2, true);
             context.fill();
           });
         });
@@ -473,14 +467,13 @@
       r = (cellWidth * cols) + l;
       b = (cellHeight * rows) + t;
       var clientWidth = r - l;
-      var clientHeight = b - t;
       var barHeight = Math.max(2, (cellHeight - 8 - (2 * (this.datas.rows.length + 1))) / this.datas.rows.length);
       var offsetHeight = t + 6;
-      forEach(self.datas.rows, function (rows, row) {
+      forEach(self.datas.rows, function () {
         forEach(this.items, function (item, index) {
           item.x = l;
           item.y = (index * cellHeight) + offsetHeight;
-          item.cw = Math.floor((clientWidth * item.value) / self.max);
+          item.cw = Math.max(3, Math.floor((clientWidth * item.value) / self.max));
           item.ch = barHeight;
           item.w = item.x + item.cw;
           item.h = item.y + barHeight;
@@ -552,19 +545,20 @@
         context.stroke();
         context.closePath();
         var sw = barHeight < 10 ? 1 : 3;
+        var dl = self.datas.rows.length;
         forEach(self.datas.rows, function (rows, row) {
           forEach(this.items, function (item, index) {
-            if (item.cw > sw) {
+            if (item.cw > sw && item.value > 0) {
               context.fillStyle = options.shadowColor;
               context.fillRect(item.x, item.y, item.cw - sw, item.ch);
             }
-            if (item.value > 0) {
-              context.fillStyle = options.colors[row % options.colors.length];
-              context.fillRect(item.x + 1, item.y, item.cw, item.ch - sw);
-            }
+            context.fillStyle = options.colors[(dl > 1 ? row : index) % options.colors.length];
+            context.fillRect(item.x + 1, item.y, item.cw, item.ch - sw);
           });
         });
-        self.drawTitle(r, t);
+        if (dl > 1) {
+          self.drawTitle(r, t);
+        }
       }
       drawGraph();
     },
@@ -594,11 +588,10 @@
       var cellHeight = Math.floor((b - t) / rows);
       r = (cellWidth * cols) + l;
       b = (cellHeight * rows) + t;
-      var clientWidth = r - l;
       var clientHeight = b - t;
       var barWidth = Math.max(2, (cellWidth - 8 - (2 * (this.datas.rows.length + 1))) / this.datas.rows.length);
       var offsetWidth = l + 6;
-      forEach(self.datas.rows, function (rows, row) {
+      forEach(self.datas.rows, function () {
         forEach(this.items, function (item, index) {
           item.x = (index * cellWidth) + offsetWidth;
           item.y = clientHeight + t - Math.floor((clientHeight * item.value) / self.max) - 1;
@@ -606,9 +599,9 @@
           item.cw = barWidth;
           item.w = item.x + item.cw;
           item.h = b;
-          if (item.ch < 2) {
-            item.y = b - 2;
-            item.ch = 2;
+          if (item.ch < 3) {
+            item.y = b - 3;
+            item.ch = 3;
           }
         });
         offsetWidth = offsetWidth + barWidth + 2;
@@ -679,19 +672,20 @@
         context.stroke();
         context.closePath();
         var sw = barWidth < 10 ? 1 : 3;
+        var dl = self.datas.rows.length;
         forEach(self.datas.rows, function (rows, row) {
           forEach(this.items, function (item, index) {
-            if (item.ch > sw) {
+            if (item.ch > sw && item.value > 0) {
               context.fillStyle = options.shadowColor;
               context.fillRect(item.x, item.y + sw, item.cw, item.ch - sw);
             }
-            if (item.value > 0) {
-              context.fillStyle = options.colors[row % options.colors.length];
-              context.fillRect(item.x, item.y, item.cw - sw, item.ch - 1);
-            }
+            context.fillStyle = options.colors[(dl > 1 ? row : index) % options.colors.length];
+            context.fillRect(item.x, item.y, item.cw - sw, item.ch - 1);
           });
         });
-        self.drawTitle(r, t);
+        if (dl > 1) {
+          self.drawTitle(r, t);
+        }
       }
       drawGraph();
     },

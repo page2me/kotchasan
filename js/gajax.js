@@ -47,6 +47,14 @@ window.$K = (function () {
     var n = parseFloat(val);
     return isNaN(n) ? 0 : n;
   };
+  window.round = function (val, digit) {
+    var value = Math.round(val * Math.pow(10, digit)) / Math.pow(10, digit);
+    if (val - value > 0) {
+      return (value + Math.floor(2 * Math.round((val - value) * Math.pow(10, (digit + 1))) / 10) / Math.pow(10, digit));
+    } else {
+      return value;
+    }
+  };
   window.copyToClipboard = function (text) {
     function selectElementText(element) {
       if (document.selection) {
@@ -995,11 +1003,7 @@ window.$K = (function () {
         }
         if (option.cache == false) {
           var match = /\?/;
-          if (match.test(url)) {
-            url = url + '&timestamp=' + new Date().getTime();
-          } else {
-            url = url + '?timestamp=' + new Date().getTime();
-          }
+          url += (match.test(url) ? '&' : '?') + new Date().getTime();
         }
         this._xhr.open(option.method, url, option.asynchronous);
         if (option.method == 'post') {
@@ -1072,11 +1076,7 @@ window.$K = (function () {
         parameters = (option.method == 'post' && parameters == null) ? '' : parameters;
         if (option.cache == false) {
           var match = /\?/;
-          if (match.test(url)) {
-            url = url + '&timestamp=' + new Date().getTime();
-          } else {
-            url = url + '?timestamp=' + new Date().getTime();
-          }
+          url += (match.test(url) ? '&' : '?') + new Date().getTime();
         }
         var xhr = this._xhr;
         var temp = this;

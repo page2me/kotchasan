@@ -398,6 +398,7 @@ input[type="url"],
 input[type="color"] {
   padding-left: 0.5em;
   padding-right: 0.5em;
+  min-width: 3.2em;
 }
 textarea {
   overflow-y: auto;
@@ -2742,7 +2743,7 @@ tbody tr:not(.thead):not(.tfoot):hover, tbody tr.highlight, tbody tr.select, .da
 }
 .table_nav fieldset.search {
   position: absolute;
-  right: 0;
+  right: 10px;
   top: 10px;
 }
 .table_nav fieldset .button {
@@ -3423,14 +3424,10 @@ td.buttons .button:last-child {
     margin-left: 0;
   }
   body.responsive .table_nav > fieldset {
-    display: inline-block;
-    clear: both;
-    margin-bottom: 5px;
+    margin: 2px 5px 2px 0 !important;
   }
   body.responsive .table_nav fieldset.search {
-    position: relative;
-    margin: 0;
-    top: 0;
+    position: static;
   }
 }
 /* tablet */

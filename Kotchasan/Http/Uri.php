@@ -466,18 +466,20 @@ class Uri extends \Kotchasan\KBase implements UriInterface
   public function createBackUri($query_string)
   {
     $qs = array();
-    foreach ($this->parseQueryParams($this->query) AS $key => $value) {
-      $key = ltrim($key, '_');
-      if (key_exists($key, $query_string) && $query_string[$key] === null) {
-        continue;
-      }
-      if ($value !== null) {
-        $qs['_'.$key] = rawurlencode($value);
+    foreach ($this->parseQueryParams($this->query) as $key => $value) {
+      if ($key != $value) {
+        $key = ltrim($key, '_');
+        if (key_exists($key, $query_string) && $query_string[$key] === null) {
+          continue;
+        }
+        if ($value !== null) {
+          $qs['_'.$key] = rawurlencode($value);
+        }
       }
     }
-    foreach ($query_string AS $key => $value) {
+    foreach ($query_string as $key => $value) {
       if ($value !== null) {
-        if (is_int($key)) {
+        if ($key == $value) {
           $qs[] = $value;
         } else {
           $qs[$key] = $value;
@@ -501,7 +503,7 @@ class Uri extends \Kotchasan\KBase implements UriInterface
         if (preg_match('/^(.*)=(.*)?$/', $item, $match)) {
           $result[$match[1]] = $match[2];
         } else {
-          $result[] = $item;
+          $result[$item] = $item;
         }
       }
     }
@@ -519,7 +521,7 @@ class Uri extends \Kotchasan\KBase implements UriInterface
   {
     $qs = array();
     foreach ($params as $key => $value) {
-      if (is_int($key)) {
+      if ($key == $value) {
         $qs[] = $value;
       } else {
         $qs[] = $key.'='.$value;

@@ -242,6 +242,42 @@ class QueryBuilder extends \Kotchasan\Database\Query
   }
 
   /**
+   * ฟังก์ชั่นสร้าง SQL EXISTS
+   *
+   * @param string $table ชื่อตาราง
+   * @param mixed $condition query WHERE
+   * @return \static
+   */
+  public function exists($table, $condition)
+  {
+    $ret = $this->buildWhere($condition);
+    if (is_array($ret)) {
+      $this->values = ArrayTool::replace($this->values, $ret[1]);
+      $ret = $ret[0];
+    }
+    $this->sqls['where'] .= (empty($this->sqls['where']) ? ' ' : ' AND ').'EXISTS (SELECT * FROM '.$this->getFullTableName($table).' WHERE '.$ret.')';
+    return $this;
+  }
+
+  /**
+   * ฟังก์ชั่นสร้าง SQL NOT EXISTS
+   *
+   * @param string $table ชื่อตาราง
+   * @param mixed $condition query WHERE
+   * @return \static
+   */
+  public function notExists($table, $condition)
+  {
+    $ret = $this->buildWhere($condition);
+    if (is_array($ret)) {
+      $this->values = ArrayTool::replace($this->values, $ret[1]);
+      $ret = $ret[0];
+    }
+    $this->sqls['where'] .= (empty($this->sqls['where']) ? ' ' : ' AND ').'NOT EXISTS (SELECT * FROM '.$this->getFullTableName($table).' WHERE '.$ret.')';
+    return $this;
+  }
+
+  /**
    * ฟังก์ชั่นสร้างคำสั่ง INSERT INTO
    * สามารถกำหนดค่า value เป็น query string ได้
    *
@@ -582,6 +618,8 @@ class QueryBuilder extends \Kotchasan\Database\Query
    * @assert where(array(array('id', array(1, 'a')), array('id', array('G.id', 'G.`id2`'))))->text() [==] " WHERE `id` IN (1, 'a') AND `id` IN (G.`id`, G.`id2`)"
    * @assert where(array('ip', 'NOT IN', array('', '192.168.1.104')))->text() [==] " WHERE `ip` NOT IN ('', '192.168.1.104')"
    * @assert where(array('U.id', '(SELECT CASE END)'))->text() [==] " WHERE U.`id` = (SELECT CASE END)"
+   * @assert where(array(array('YEAR(`create_date`)', 'YEAR(S.`create_date`)')))->text() [==] " WHERE YEAR(`create_date`) = YEAR(S.`create_date`)"
+   * @assert where(array('YEAR(`create_date`)', 'YEAR(S.`create_date`)'))->text() [!=] " WHERE YEAR(`create_date`) = YEAR(S.`create_date`)"
    */
   public function where($condition, $oprator = 'AND', $id = 'id')
   {

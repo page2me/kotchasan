@@ -31,10 +31,38 @@ class Currency
   }
 
   /**
+   * ฟังก์ชั่นคำนวณภาษี
+   * $vat_ex = true ราคาสินค้ารวม VAT เช่น ราคาสินค้า 100 + VAT 7 = ราคาขาย 107
+   * $vat_ex = false ราคาสินค้ารวม VAT เช่น ราคาขาย 100 = ราคาสินค้า 93 + VAT 7
+   *
+   * @param double $amount ราคาขาย
+   * @param double $vat VAT
+   * @param boolean $vat_ex
+   * @return double คืนค่า VAT จากราคาขาย
+   *
+   * @assert (1000, 7, true) [==] 70
+   * @assert (1000, 7, false) [==] 65.420560747663558
+   */
+  public static function calcVat($amount, $vat, $vat_ex = true)
+  {
+    if ($vat_ex) {
+      $result = (($vat * $amount) / 100);
+    } else {
+      $result = $amount - ($amount * (100 / (100 + $vat)));
+    }
+    return $result;
+  }
+
+  /**
    * แปลงจำนวนเงินเป็นตัวหนังสือ
    *
    * @param string $thb
    * @return string
+   *
+   * @assert (100.00) [==] 'one hundred Baht'
+   * @assert (1000.50) [==] 'one thousand Baht and fifty Satang'
+   * @assert (1000050) [==] 'one millionfifty Baht'
+   * @assert (-1000000050) [==] 'negative one billionfifty Baht'
    */
   public static function bahtEng($thb)
   {
@@ -52,12 +80,18 @@ class Currency
    *
    * @param string $thb
    * @return string
+   *
+   * @assert (1000.50) [==] 'หนึ่งพันบาทห้าสิบสตางค์'
+   * @assert (1000.00) [==] 'หนึ่งพันบาทถ้วน'
+   * @assert (1000) [==] 'หนึ่งพันบาทถ้วน'
+   * @assert (1000050) [==] 'หนึ่งล้านห้าสิบบาทถ้วน'
+   * @assert (-1000000050) [==] 'ลบหนึ่งพันล้านห้าสิบบาทถ้วน'
    */
   public static function bahtThai($thb)
   {
-    if (preg_match('/([\-0-9]+)(\.([0-9]+))?/', (string)$thb, $match)) {
-      $thb = $match[1];
-      $ths = !empty($match[3]) ? substr($match[3].'00', 0, 2) : '';
+    if (preg_match('/(\-){0,1}([0-9]+)(\.([0-9]+))?/', (string)$thb, $match)) {
+      $thb = $match[2];
+      $ths = !empty($match[4]) ? substr($match[4].'00', 0, 2) : '';
       $thaiNum = array('', 'หนึ่ง', 'สอง', 'สาม', 'สี่', 'ห้า', 'หก', 'เจ็ด', 'แปด', 'เก้า');
       $unitBaht = array('บาท', 'สิบ', 'ร้อย', 'พัน', 'หมื่น', 'แสน', 'ล้าน', 'สิบ', 'ร้อย', 'พัน', 'หมื่น', 'แสน', 'ล้าน');
       $unitSatang = array('สตางค์', 'สิบ');
@@ -93,7 +127,8 @@ class Currency
         $S = $tnum.$unit;
         $THB = $S.$THB;
       }
-      if ($ths == '00') {
+      $THB = ($match[1] == '-' ? 'ลบ' : '').$THB;
+      if ($ths == '') {
         $THS = 'ถ้วน';
       } else {
         $j = 0;
@@ -134,8 +169,6 @@ class Currency
    */
   private function engFormat($number)
   {
-    if (!$number)
-      return "zero";
     if (is_int($number) && $number < abs(pow(10, 18))) {
       switch ($number) {
         case $number < 0:
@@ -225,42 +258,50 @@ class Currency
           break;
         case $number < pow(10, 3):
           $prefix = self::engFormat(intval(floor($number / pow(10, 2))))." hundred";
-          if ($number % pow(10, 2))
+          if ($number % pow(10, 2)) {
             $suffix = " and ".self::engFormat($number % pow(10, 2));
+          }
           $string = $prefix.$suffix;
           break;
         case $number < pow(10, 6):
           $prefix = self::engFormat(intval(floor($number / pow(10, 3))))." thousand";
-          if ($number % pow(10, 3))
+          if ($number % pow(10, 3)) {
             $suffix = self::engFormat($number % pow(10, 3));
-          $string = $prefix." ".$suffix;
+          }
+          $string = $prefix.$suffix;
           break;
         case $number < pow(10, 9):
           $prefix = self::engFormat(intval(floor($number / pow(10, 6))))." million";
-          if ($number % pow(10, 6))
+          if ($number % pow(10, 6)) {
             $suffix = self::engFormat($number % pow(10, 6));
-          $string = $prefix." ".$suffix;
+          }
+          $string = $prefix.$suffix;
           break;
         case $number < pow(10, 12):
           $prefix = self::engFormat(intval(floor($number / pow(10, 9))))." billion";
-          if ($number % pow(10, 9))
+          if ($number % pow(10, 9)) {
             $suffix = self::engFormat($number % pow(10, 9));
-          $string = $prefix." ".$suffix;
+          }
+          $string = $prefix.$suffix;
           break;
         case $number < pow(10, 15):
           $prefix = self::engFormat(intval(floor($number / pow(10, 12))))." trillion";
-          if ($number % pow(10, 12))
+          if ($number % pow(10, 12)) {
             $suffix = self::engFormat($number % pow(10, 12));
-          $string = $prefix." ".$suffix;
+          }
+          $string = $prefix.$suffix;
           break;
         case $number < pow(10, 18):
           $prefix = self::engFormat(intval(floor($number / pow(10, 15))))." quadrillion";
-          if ($number % pow(10, 15))
+          if ($number % pow(10, 15)) {
             $suffix = self::engFormat($number % pow(10, 15));
-          $string = $prefix." ".$suffix;
+          }
+          $string = $prefix.$suffix;
           break;
       }
+      return $string;
+    } else {
+      return "zero";
     }
-    return $string;
   }
 }

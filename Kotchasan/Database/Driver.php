@@ -419,6 +419,18 @@ abstract class Driver extends Query
   abstract public function update($table_name, $condition, $save);
 
   /**
+   * ฟังก์ชั่นเพิ่มข้อมูลใหม่ลงในตาราง
+   * ถ้ามีข้อมูลเดิมอยู่แล้วจะเป็นการอัปเดท
+   * (ข้อมูลเดิมตาม KEY ที่เป็น UNIQUE)
+   *
+   * @param string $table_name ชื่อตาราง
+   * @param array|object $save ข้อมูลที่ต้องการบันทึก รูปแบบ array('key1'=>'value1', 'key2'=>'value2', ...)
+   * @param array|object $update ข้อมูลหากเป็นการอัปเดท, ไม่ต้องระบุหากเป็นการใช้ค่าเดิม
+   * @return int|null insert คืนค่า id ที่เพิ่ม, update คืนค่า 0, ผิดพลาด คืนค่า null
+   */
+  abstract public function insertOrUpdate($table_name, $save, $update = array());
+
+  /**
    * เลือกฐานข้อมูล.
    *
    * @param string $database
