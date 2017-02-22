@@ -79,6 +79,9 @@
             val.value = floatval(this.innerHTML.replace(/,/g, ''));
           }
           val.title = this.innerHTML.strip_tags();
+          if (this.dataset.tooltip) {
+            val.tooltip = this.dataset.tooltip;
+          }
           sum = sum + val.value;
           max = Math.max(max, val.value);
           datas.push(val);
@@ -100,14 +103,16 @@
         var pos = GEvent.pointer(e);
         var mouseX = pos.x - offset.left;
         var mouseY = pos.y - offset.top;
+        var tootip = new Array();
         forEach(self.datas.rows, function (rows, row) {
           forEach(this.items, function (item, index) {
             if (mouseX >= item.x && mouseX <= item.w && mouseY >= item.y && mouseY <= item.h) {
               currItem = item;
-              self.tooltip.innerHTML = self.subtitle + self.datas.labels[index] + '<br>' + rows.title + ' ' + item.title;
-              var rc = self.tooltip.getDimensions();
-              self.tooltip.style.left = (pos.x - (rc.width / 2)) + 'px';
-              self.tooltip.style.top = (pos.y - 10 - rc.height) + 'px';
+              if (item.tooltip) {
+                tootip.push(item.tooltip);
+              } else {
+                tootip.push('<b>' + self.subtitle + self.datas.labels[index] + '</b> ' + rows.title + ' ' + item.title);
+              }
               return true;
             }
           });
@@ -122,6 +127,10 @@
         } else if (self.hoverItem !== currItem) {
           self.canvas.style.cursor = 'pointer';
           self.hoverItem = currItem;
+          self.tooltip.innerHTML = tootip.join('<br>');
+          var rc = self.tooltip.getDimensions();
+          self.tooltip.style.left = (pos.x - (rc.width / 2)) + 'px';
+          self.tooltip.style.top = (pos.y - 10 - rc.height) + 'px';
           self.tooltip.fadeTo(90);
           self.tooltip.show();
         }
@@ -219,8 +228,8 @@
       b = (cellHeight * rows) + t;
       var clientHeight = b - t;
       var o = options.lineWidth + 2;
-      forEach(this.datas.rows, function (rows, row) {
-        forEach(rows.items, function (item, index) {
+      forEach(this.datas.rows, function () {
+        forEach(this.items, function (item, index) {
           item.cx = (index * cellWidth) + l;
           item.cy = clientHeight + t - Math.floor((clientHeight * item.value) / self.max);
           item.x = item.cx - o;
@@ -293,7 +302,7 @@
         var xp, yp;
         context.lineWidth = Math.max(1, options.lineWidth);
         forEach(self.datas.rows, function (rows, row) {
-          forEach(this.items, function (item, index) {
+          forEach(rows.items, function (item, index) {
             if (index > 0) {
               context.strokeStyle = options.colors[row % options.colors.length];
               context.beginPath();
@@ -333,7 +342,6 @@
       var sum = this.datas.rows[0].total;
       var currentPullOutSlice = null;
       var currentPullOutDistance = 20;
-      var maxPullOutDistance = 20;
       forEach(this.datas.rows[0].items, function (item, index) {
         var fraction = item.value / sum;
         item.startAngle = (counter * Math.PI * 2);
@@ -404,7 +412,6 @@
       drawGraph();
       var _mouseMove = function (e) {
         var currItem = null;
-        var currIndex = null;
         var offset = self.canvas.viewportOffset();
         var pos = GEvent.pointer(e);
         var mouseX = pos.x - offset.left;
@@ -420,7 +427,11 @@
           forEach(self.datas.rows[0].items, function (item, index) {
             if (mouseAngle >= item.startAngle && mouseAngle <= item.endAngle) {
               currItem = item;
-              self.tooltip.innerHTML = self.subtitle + self.datas.labels[index] + '<br>' + self.datas.rows[0].title + ' ' + item.title;
+              if (item.tooltip) {
+                self.tooltip.innerHTML = item.tooltip;
+              } else {
+                self.tooltip.innerHTML = self.subtitle + self.datas.labels[index] + '<br>' + self.datas.rows[0].title + ' ' + item.title;
+              }
               var rc = self.tooltip.getDimensions();
               self.tooltip.style.left = (pos.x - (rc.width / 2)) + 'px';
               self.tooltip.style.top = (pos.y - 10 - rc.height) + 'px';
