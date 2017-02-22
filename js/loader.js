@@ -90,20 +90,17 @@
       }
     },
     reload: function () {
-      var locs = window.location.toString().split('#');
-      if (locs.length == 1) {
-        window.location.reload();
-      } else {
-        var patt = /[0-9]+/,
-          ret = new Array();
+      var locs = window.location.toString().split('#'),
+        ret = new Array();
+      if (locs.length > 1) {
         forEach(locs[1].split('&'), function () {
-          if (this != 'action=logout' && this != 'action=login' && !patt.test(this)) {
+          if (!/[0-9]+/.test(this)) {
             ret.push(this);
           }
         });
-        ret.push(new Date().getTime());
-        window.location = locs[0] + '#' + decodeURIComponent(ret.join('&'));
       }
+      ret.push(new Date().getTime());
+      window.location = locs[0] + '#' + decodeURIComponent(ret.join('&'));
     }
   };
 }());

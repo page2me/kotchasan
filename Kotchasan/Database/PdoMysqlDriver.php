@@ -169,9 +169,14 @@ class PdoMysqlDriver extends Driver
     $keys = array();
     $values = array();
     foreach ($save as $key => $value) {
-      $keys[] = $key;
-      $values[] = ':'.$key;
-      $params[':'.$key] = $value;
+      if (preg_match('/^\([A-Z0-9\+\s\(]{0,}SELECT\s.*\)$/', $value)) {
+        $keys[] = $key;
+        $values[] = $value;
+      } else {
+        $keys[] = $key;
+        $values[] = ':'.$key;
+        $params[':'.$key] = $value;
+      }
     }
     return 'INSERT INTO '.$table_name.' (`'.implode('`,`', $keys).'`) VALUES ('.implode(',', $values).')';
   }
@@ -390,8 +395,14 @@ class PdoMysqlDriver extends Driver
     $sets = array();
     $values = array();
     foreach ($save as $key => $value) {
-      $sets[] = '`'.$key.'` = :_'.$key;
-      $values[':_'.$key] = $value instanceof QueryBuilder ? '('.$value->text().')' : $value;
+      if ($value instanceof QueryBuilder) {
+        $sets[] = '`'.$key.'` = ('.$value->text().')';
+      } elseif (preg_match('/^\([A-Z0-9\+\s\(]{0,}SELECT\s.*\)$/', $value)) {
+        $sets[] = '`'.$key.'` = '.$value;
+      } else {
+        $sets[] = '`'.$key.'` = :_'.$key;
+        $values[':_'.$key] = $value;
+      }
     }
     $condition = $this->buildWhere($condition);
     if (is_array($condition)) {

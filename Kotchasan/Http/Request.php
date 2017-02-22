@@ -401,25 +401,24 @@ class Request extends AbstractRequest implements RequestInterface
 
   /**
    * ฟังก์ชั่น ตรวจสอบ token ที่มาจากฟอร์ม
-   * ถ้าไม่มีจะตรวจสอบจาก Referer
+   * รับค่าที่มาจาก $_POST เท่านั้น
    * ฟังก์ชั่นนี้ต้องเรียกต่อจาก initSession() เสมอ
+   * อายุของ token กำหนดที่ TOKEN_LIMIT
    *
-   * @return boolean คืนค่า true ถ้ามีการ submit มาจากไซต์นี้
+   * @return boolean คืนค่า true ถ้า token ถูกต้องและไม่หมดอายุ
    */
   public function isSafe()
   {
-    $token = $this->globals(array('POST', 'GET'), 'token', null)->toString();
+    $token = $this->post('token')->toString();
     if ($token !== null) {
       if (isset($_SESSION[$token]) && $_SESSION[$token] < TOKEN_LIMIT && $this->isReferer()) {
         $_SESSION[$token] ++;
         return true;
       } else {
         unset($_SESSION[$token]);
-        return false;
       }
-    } else {
-      return $this->isReferer();
     }
+    return false;
   }
 
   /**
