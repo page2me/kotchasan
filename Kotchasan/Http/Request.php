@@ -400,7 +400,7 @@ class Request extends AbstractRequest implements RequestInterface
   }
 
   /**
-   * ฟังก์ชั่น ตรวจสอบ token ที่มาจากฟอร์ม
+   * ฟังก์ชั่น ตรวจสอบ token ที่มาจากฟอร์ม และ ตรวจสอบ Referer ด้วย
    * รับค่าที่มาจาก $_POST เท่านั้น
    * ฟังก์ชั่นนี้ต้องเรียกต่อจาก initSession() เสมอ
    * อายุของ token กำหนดที่ TOKEN_LIMIT

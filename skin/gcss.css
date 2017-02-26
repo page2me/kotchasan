@@ -165,6 +165,9 @@ ul.list-style-none {
 .nowrap {
   white-space: nowrap;
 }
+.wrap {
+  white-space: normal;
+}
 /* Font Style */
 del {
   text-decoration: line-through;

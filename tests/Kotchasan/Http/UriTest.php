@@ -287,27 +287,35 @@ class UriTest extends \PHPUnit_Framework_TestCase
   public function testParseQueryParams()
   {
     $this->assertEquals(
-      array('module' => 'home', 'id' => 1, 'visited' => 'visited'), $this->uriFactory()->parseQueryParams('module=home&id=1&visited')
+      array('module' => 'home', 'id' => 1, 'visited' => null), $this->uriFactory()->parseQueryParams('module=home&id=1&visited')
     );
   }
 
   public function testParamsToQuery()
   {
     $this->assertEquals(
-      'module=home&amp;id=1&amp;visited', $this->uriFactory()->paramsToQuery(array('module' => 'home', 'id' => 1, 0 => 'visited'), true)
+      'module=home&amp;id=1&amp;visited', $this->uriFactory()->paramsToQuery(array('module' => 'home', 'id' => 1, 'visited' => null), true)
     );
   }
 
   public function testParamsToQuery2()
   {
     $this->assertEquals(
-      'module=home&id=1&visited', $this->uriFactory()->paramsToQuery(array('module' => 'home', 'id' => 1, 0 => 'visited'), false)
+      'module=home&id=1&visited', $this->uriFactory()->paramsToQuery(array('module' => 'home', 'id' => 1, 'visited' => null), false)
+    );
+  }
+
+  public function testGetBack()
+  {
+    $_GET = array('_module' => 'test', '_page' => 1, '_sort' => 'id', 'token' => '123456abcd');
+    $this->assertEquals(
+      "index.php?page=2&module=mymodule&sort=id", $this->uriFactory()->getBack('index.php', array('page' => 2, 'module' => 'mymodule', 'time' => null))
     );
   }
 
   public function testPostBack()
   {
-    $_POST = array('_module' => 'test', '_page' => 1, '_sort' => 'id');
+    $_POST = array('_module' => 'test', '_page' => 1, '_sort' => 'id', 'token' => '123456abcd');
     $this->assertEquals(
       "index.php?page=2&module=mymodule&sort=id", $this->uriFactory()->postBack('index.php', array('page' => 2, 'module' => 'mymodule', 'time' => null))
     );
