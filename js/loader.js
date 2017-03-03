@@ -29,24 +29,14 @@
       }
       var temp = this;
       window.setInterval(function () {
-        var curr_url = location.toString().replace('_=_', '');
-        if (curr_url.indexOf('#') > -1) {
-          locs = curr_url.split('#');
-        } else {
-          locs = curr_url.split('?');
-        }
-        locs = locs[1] && locs[1].indexOf('=') > -1 ? locs[1] : '';
-        if (temp.lasturl != '' && locs == '') {
-          var qs = temp.geturl.call(temp, curr_url);
-          locs = qs === null ? 'module=' + FIRST_MODULE : qs.join('&');
-        }
-        if (locs !== '' && locs != temp.lasturl) {
-          temp.lasturl = locs;
-          temp.myhistory.push(locs);
+        locs = window.location.toString().split('#');
+        if (locs[1] && locs[1] != temp.lasturl) {
+          temp.lasturl = locs[1];
+          temp.myhistory.push(locs[1]);
           if (temp.myhistory.length > 2) {
             temp.myhistory.shift();
           }
-          temp.req.send(reader, locs, callback);
+          temp.req.send(reader, locs[1], callback);
         }
       }, 100);
     },
@@ -71,10 +61,9 @@
       return this;
     },
     location: function (url) {
-      var locs = window.location.toString().split('#'),
-        ret = this.geturl.call(this, url);
+      var ret = this.geturl.call(this, url);
       if (ret) {
-        ret.push(new Date().getTime());
+        var locs = window.location.toString().split('#');
         window.location = locs[0] + '#' + decodeURIComponent(ret.join('&'));
         return false;
       } else {
@@ -84,7 +73,9 @@
     },
     back: function () {
       if (this.myhistory.length >= 2) {
-        window.location = WEB_URL + 'index.php?' + this.myhistory[this.myhistory.length - 2];
+        var history = this.myhistory[this.myhistory.length - 2],
+          urls = window.location.toString().split('#');
+        window.location = urls[0] + '#' + history;
       } else {
         window.history.go(-1);
       }

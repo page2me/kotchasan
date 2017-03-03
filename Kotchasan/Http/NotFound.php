@@ -27,8 +27,8 @@ class NotFound extends Response
   public function __construct($message = null, $code = 404)
   {
     $message = empty($message) ? '404 Not Found' : $message;
-    parent::__construct($code, $message);
-    $response = $this->withProtocolVersion('1.0')->withAddedHeader('Status', $message);
+    parent::__construct($code);
+    $response = $this->withProtocolVersion('1.0');
     if ($message) {
       $response->withContent($message);
     }

@@ -175,8 +175,6 @@ class View extends \Kotchasan\KBase
         } elseif (!isset($query_url[$match[2]])) {
           $query_url[$match[2]] = $match[3];
         }
-      } else {
-        $query_url[] = $item;
       }
     }
     if (is_array($f)) {
@@ -186,8 +184,6 @@ class View extends \Kotchasan\KBase
       foreach (explode('&', str_replace('&amp;', '&', $f)) as $item) {
         if (preg_match('/^(.*)=(.*)$/', $item, $match)) {
           $query_url[$match[1]] = $match[2];
-        } else {
-          $query_url[] = $item;
         }
       }
       $temp = $query_url;

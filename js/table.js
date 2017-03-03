@@ -137,6 +137,8 @@
                 if (confirm(trans('You want to XXX ?').replace(/XXX/, trans('delete')))) {
                   action = 'action=delete&id=' + hs[2];
                 }
+              } else if (hs[4]) {
+                action = 'action=' + hs[1] + '_' + hs[2] + '&id=' + hs[4];
               } else {
                 action = 'action=' + hs[1] + '&id=' + hs[2];
               }

@@ -47,7 +47,9 @@ class View extends \Kotchasan\View
       ));
     }
     // fieldset
-    $fieldset = $form->add('fieldset');
+    $fieldset = $form->add('fieldset', array(
+      'title' => 'Please enter Username and Password (admin+admin)'
+    ));
     // username
     $fieldset->add('text', array(
       'id' => 'login_username',

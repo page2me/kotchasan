@@ -266,6 +266,14 @@ window.$K = (function () {
     },
     isGElement: function (o) {
       return o != null && typeof o == "object" && 'Ready' in o && 'element' in o;
+    },
+    toArray: function (o) {
+      var prop,
+        result = new Array();
+      for (prop in o) {
+        result.push(o[prop]);
+      }
+      return result;
     }
   });
   window.GClass = {

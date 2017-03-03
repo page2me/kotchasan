@@ -56,32 +56,37 @@ define('VENDOR_DIR', $vendorDir);
 /**
  *  document root (Server)
  */
+$contextPrefix = '';
 if (isset($_SERVER['APPL_PHYSICAL_PATH'])) {
   $docRoot = rtrim(realpath($_SERVER['APPL_PHYSICAL_PATH']), DIRECTORY_SEPARATOR);
-} elseif (isset($_SERVER['CONTEXT_DOCUMENT_ROOT'])) {
-  $docRoot = rtrim(realpath($_SERVER['CONTEXT_DOCUMENT_ROOT']), DIRECTORY_SEPARATOR);
 } elseif (strpos($_SERVER['SCRIPT_FILENAME'], $_SERVER['DOCUMENT_ROOT']) !== false) {
   $docRoot = rtrim(realpath($_SERVER['DOCUMENT_ROOT']), DIRECTORY_SEPARATOR);
 } else {
-  $docRoot = '';
-  define('APP_PATH', '');
+  $docRoot = dirname($vendorDir);
+  $dir = basename($docRoot);
+  $ds = explode($dir, dirname($_SERVER['SCRIPT_NAME']), 2);
+  if (sizeof($ds) > 1) {
+    $contextPrefix = $ds[0].$dir;
+    $appPath = $ds[1];
+    if (DIRECTORY_SEPARATOR != '/') {
+      $contextPrefix = str_replace('\\', '/', $contextPrefix);
+    }
+  }
+  if (!defined('APP_PATH')) {
+    define('APP_PATH', $docRoot.$appPath.'/');
+  }
+  if (!defined('BASE_PATH')) {
+    define('BASE_PATH', $contextPrefix.$appPath.'/');
+  }
 }
 if (DIRECTORY_SEPARATOR != '/' && $docRoot != '') {
   $docRoot = str_replace('\\', '/', $docRoot);
 }
 /**
- * ตัวแปร CONTEXT_PREFIX เช่น /~username
- */
-$contextPrefix = isset($_SERVER['CONTEXT_PREFIX']) ? $_SERVER['CONTEXT_PREFIX'] : '';
-/**
  * พาธของ Application เช่น D:/htdocs/kotchasan/
  */
 if (!defined('APP_PATH')) {
   $appPath = dirname($_SERVER['SCRIPT_NAME']);
-  if (!empty($contextPrefix)) {
-    $ds = explode($contextPrefix, $appPath);
-    $appPath = $ds[1];
-  }
   if (DIRECTORY_SEPARATOR != '/') {
     $appPath = str_replace('\\', '/', $appPath);
   }

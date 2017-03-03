@@ -171,6 +171,42 @@ class UploadedFile implements UploadedFileInterface
   }
 
   /**
+   * อ่านข้อผิดพลาดของไฟล์อัปโหลด เป็นข้อความ
+   *
+   * @staticvar array $errors
+   * @return string
+   */
+  public function getErrorMessage()
+  {
+    switch ($this->error) {
+      case UPLOAD_ERR_INI_SIZE:
+        return sprintf('The file "%s" exceeds your upload_max_filesize ini directive (limit is %s).', $this->getClientFilename(), self::getUploadSize());
+        break;
+      case UPLOAD_ERR_FORM_SIZE:
+        return sprintf('The file "%s" exceeds the upload limit defined in your form.', $this->getClientFilename());
+        break;
+      case UPLOAD_ERR_PARTIAL:
+        return sprintf('The file "%s" was only partially uploaded.', $this->getClientFilename());
+        break;
+      case UPLOAD_ERR_CANT_WRITE:
+        return sprintf('The file "%s" could not be written on disk.', $this->getClientFilename());
+        break;
+      case UPLOAD_ERR_NO_TMP_DIR:
+        return 'File could not be uploaded: missing temporary directory.';
+        break;
+      case UPLOAD_ERR_EXTENSION:
+        return 'File upload was stopped by a PHP extension.';
+        break;
+      case UPLOAD_ERR_OK:
+      case UPLOAD_ERR_NO_FILE:
+        break;
+      default:
+        return sprintf('The file "%s" was not uploaded due to an unknown error.', $this->getClientFilename());
+        break;
+    }
+  }
+
+  /**
    * อ่านไฟล์รวม path จากตัวแปร tmp_name
    *
    * @return string|null
@@ -198,6 +234,19 @@ class UploadedFile implements UploadedFileInterface
   public function getClientMediaType()
   {
     return $this->mime;
+  }
+
+  /**
+   * อ่านชื่อไฟล์จากไฟล์ที่อัปโหลดและตัดตัวอักษที่ไม่สามารถใช้เป็นชื่อไฟล์ได้ออก
+   * ยอมรับ ภาษาอังกฤษ ตัวเลข ( ) _ - และ .(จุด) เท่านั้น
+   * นอกเหนือจากนั้นจะถูกแทนที่ด้วย $replace ติดกันไม่เกิน 1 ตัวอักษร
+   *
+   * @param string $replace ตัวอักษรที่จะแทนที่อักขระไที่ไม่ต้องการ ถ้าไม่ระบุจะใช้ _ (ขีดล่าง)
+   * @return string
+   */
+  public function getCleanFilename($replace = '_')
+  {
+    return preg_replace('/[^a-zA-Z0-9_\-\.\(\)]{1,}/', $replace, $this->name);
   }
 
   /**
