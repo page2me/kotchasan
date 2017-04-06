@@ -9,6 +9,7 @@
 namespace Kotchasan\Database;
 
 use \Kotchasan\ArrayTool;
+use \Kotchasan\Database\Sql;
 
 /**
  * Database Query (base class)
@@ -25,21 +26,6 @@ abstract class Query extends \Kotchasan\Database\Db
    * @var array
    */
   protected $sqls;
-
-  /**
-   * ฟังก์ชั่นสร้าง SQL สำหรับหาค่าสูงสุด + 1
-   * ใช้ในการหาค่า id ถัดไป
-   *
-   * @param string $field ชื่อฟิลด์ที่ต้องการหาค่าสูงสุด
-   * @param string $table ชื่อตาราง
-   * @param mixed $condition query WHERE
-   * @param string $alias ชื่อของผลลัพท์ ถ้าไม่ระบุจะเป็นชื่อเดียวกับชื่อฟิลด์
-   * @return string SQL Command
-   */
-  public function buildNext($field, $table, $condition = null, $alias = '')
-  {
-    return $this->db->buildNext($field, $this->getFullTableName($table), $condition, $alias);
-  }
 
   /**
    * ฟังก์ชั่นสำหรับจัดกลุ่มคำสั่ง และ เชื่อมแต่ละกลุ่มด้วย AND
@@ -78,17 +64,16 @@ abstract class Query extends \Kotchasan\Database\Db
   }
 
   /**
-   * ฟังก์ชั่นสร้างคำสั่ง SQL เป้นข้อความ
+   * ฟังก์ชั่นสร้างคำสั่ง SQL เป็นข้อความ
    *
-   * @param boolean $replace
    * @return string
    */
-  public function text($replace = false)
+  public function text()
   {
     if (!empty($this->sqls)) {
       $sql = $this->db->makeQuery($this->sqls);
       foreach ($this->getValues() as $key => $value) {
-        $sql = str_replace($key, is_string($value) ? "'$value'" : $value, $sql);
+        $sql = str_replace($key, (is_string($value) ? "'$value'" : $value), $sql);
       }
       return $sql;
     }
@@ -155,7 +140,7 @@ abstract class Query extends \Kotchasan\Database\Db
       if ($fields[0] instanceof QueryBuilder) {
         // QueryBuilder
         $ret = '('.$fields[0]->text().') AS `'.$fields[1].'`';
-      } elseif (preg_match('/^([a-zA-Z0-9\\\]+)::([a-zA-Z0-9]+)$/', $fields[0], $match)) {
+      } elseif (is_string($fields[0]) && preg_match('/^([a-zA-Z0-9\\\]+)::([a-zA-Z0-9]+)$/', $fields[0], $match)) {
         // Recordset
         $ret = '\''.addslashes($fields[0]).'\' AS `'.$fields[1].'`';
       } else {
@@ -164,16 +149,16 @@ abstract class Query extends \Kotchasan\Database\Db
         foreach ($fields AS $item) {
           $rets[] = $this->buildSelect($item);
         }
-        $ret = implode(', ', $rets);
+        $ret = implode(',', $rets);
       }
     } elseif ($fields instanceof QueryBuilder) {
       // QueryBuilder
       $ret = '('.$fields->text().')';
+    } elseif ($fields instanceof Sql) {
+      // Sql
+      $ret = $fields->text();
     } elseif ($fields == '*') {
       $ret = '*';
-    } elseif (strpos($fields, '(') !== false && preg_match('/^(.*?)(\s{0,}(as)?\s{0,}`?([a-z0-9_]+)`?)?$/i', $fields, $match)) {
-      // (...) alias
-      $ret = $match[1].(isset($match[4]) ? " AS `$match[4]`" : '');
     } elseif (preg_match('/^([0-9]+)([\s]+as)?[\s]+`?([^`]+)`?$/i', $fields, $match)) {
       // 0 as alias
       $ret = $match[1].' AS `'.$match[3].'`';
@@ -417,31 +402,22 @@ abstract class Query extends \Kotchasan\Database\Db
         if (!empty($ps)) {
           $ret = array($ret, $ps);
         }
-      } elseif (is_string($condition[0]) && strpos($condition[0], '(') !== false) {
-        $qs = array($condition[0]);
-        $ps = array();
-        unset($condition[0]);
-        foreach ($condition as $i => $item) {
-          $ret = $this->whereValue($item, $i);
-          if (is_array($ret)) {
-            $qs[] = $ret[0];
-            $ps = ArrayTool::replace($ps, $ret[1]);
-          } else {
-            $qs[] = $ret;
-          }
-        }
-        $ret = implode(' '.$operator.' ', $qs);
-        if (!empty($ps)) {
-          $ret = array($ret, $ps);
-        }
       } else {
         $ret = $this->whereValue($condition);
+      }
+    } elseif ($condition instanceof Sql) {
+      $values = $condition->getValues();
+      if (empty($values)) {
+        $ret = $condition->text();
+      } else {
+        $ret = array($condition->text(), $values);
       }
     } elseif (preg_match('/^[0-9]+$/', $condition)) {
       // primaryKey
       $ret = $this->fieldName($id).' = '.$condition;
     } else {
-      $ret = $condition;
+      // พารามิเตอร์ ไม่ถูกต้อง
+      throw new \InvalidArgumentException('Invalid arguments in buildWhere');
     }
     return $ret;
   }
@@ -523,6 +499,13 @@ abstract class Query extends \Kotchasan\Database\Db
         } else {
           $result = array($key.' '.$operator.' ('.$value->text().')', $values);
         }
+      } elseif ($value instanceof Sql) {
+        $values = $value->getValues();
+        if (empty($values)) {
+          $result = $key.' '.$operator.' '.$value->text();
+        } else {
+          $result = array($key.' '.$operator.' '.$value->text(), $values);
+        }
       } elseif (is_array($value)) {
         if ($operator == '=') {
           $operator = 'IN';
@@ -544,9 +527,6 @@ abstract class Query extends \Kotchasan\Database\Db
       } elseif (empty($value)) {
         // value เป็น string ว่าง, 0, null
         $result = $key.' '.$operator.' '.(is_string($value) ? "'$value'" : $value);
-      } elseif (preg_match('/^(|[A-Z\s_]+)\(.*\)$/', $value)) {
-        // value อยู่ในวงเล็บ (...) หรือเป็น SQL function
-        $result = $key.' '.$operator.' '.$value;
       } elseif (preg_match('/^(\-?[0-9\s\.]+|true|false)$/i', $value)) {
         // value เป็น ตัวเลข จุดทศนิยม เครื่องหมาย - / , และ true, false
         // เช่น ตัวเลข, จำนวนเงิน, boolean
@@ -554,9 +534,6 @@ abstract class Query extends \Kotchasan\Database\Db
       } elseif (preg_match('/^[0-9\s\-:]+$/', $value)) {
         // วันที่
         $result = "$key $operator '$value'";
-      } elseif (preg_match('/^\((.*)\)([\s]+as)?[\s]+([a-z0-9_]+)$/i', $value, $match)) {
-        // value เป็น query string
-        $result = "$key $operator ($match[1]) AS `$match[3]`";
       } elseif (preg_match('/^([A-Z0-9]{1,2})\.([a-zA-Z0-9_]+)$/', $value, $match)) {
         // U.id
         if ($operator == 'IN' || $operator == 'NOT IN') {

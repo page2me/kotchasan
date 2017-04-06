@@ -77,7 +77,7 @@ class Schema
   public function fields($table)
   {
     if (empty($table)) {
-      throw new \InvalidArgumentException('table name empty in '.__METHOD__);
+      throw new \InvalidArgumentException('table name empty in fields');
     } else {
       $this->init($table);
       return array_keys($this->tables[$table]);

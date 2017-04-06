@@ -365,21 +365,19 @@ window.$K = (function () {
       return this.clientHeight - parseInt(this.getStyle('paddingTop')) - parseInt(this.getStyle('paddingBottom'));
     },
     viewportOffset: function () {
-      var t = this.offsetTop;
-      var l = this.offsetLeft;
-      var p = this.offsetParent;
-      while (p !== null) {
-        t += p.offsetTop;
-        l += p.offsetLeft;
-        if (p.offsetParent == document.body && p.style.position == 'absolute') {
-          break;
-        }
+      var t = 0,
+        l = 0,
+        p = this;
+      while (p) {
+        t += parseInt(p.offsetTop);
+        l += parseInt(p.offsetLeft);
         p = p.offsetParent;
       }
-      var result = [l, t];
-      result.left = l;
-      result.top = t;
-      return result;
+      if (this.getBoundingClientRect) {
+        return {top: t, left: this.getBoundingClientRect().left};
+      } else {
+        return {top: t, left: l};
+      }
     },
     getDimensions: function () {
       var ow, oh;
@@ -406,10 +404,7 @@ window.$K = (function () {
           s.visibility = ov;
         }
       }
-      var result = [ow, oh];
-      result.width = ow;
-      result.height = oh;
-      return result;
+      return {width: ow, height: oh};
     },
     getOffsetParent: function () {
       var e = this.offsetParent;
@@ -1239,7 +1234,7 @@ window.$K = (function () {
         }
       };
       var _doFileChanged = function () {
-        this.text.value = this.value;
+        this.display.value = this.value;
         if (this.files) {
           var preview = $E(this.get('data-preview'));
           if (preview) {
@@ -1309,7 +1304,7 @@ window.$K = (function () {
             'name': this.name,
             'id': this.id
           };
-          var hidden = frm.create('input', o);
+          var hidden = $G(text.parentNode).create('input', o);
           text = $G().create('input', {
             'type': 'text'
           });
@@ -1354,6 +1349,7 @@ window.$K = (function () {
               text.disabled = hidden.disabled ? true : false;
             }
           }, 500);
+          hidden.display = text;
           this.replace(text);
         } else if (obj.type == 'number' || obj.type == 'email' || obj.type == 'url' || obj.type == 'color' || obj.type == 'currency') {
           var o = {
@@ -1399,7 +1395,7 @@ window.$K = (function () {
             text = $G(p).create('input', {'type': 'text'});
             text.disabled = true;
             text.placeholder = this.placeholder;
-            this.text = text;
+            this.display = text;
             this.style.zIndex = text.style.zIndex + 1;
           }
         }
@@ -2696,7 +2692,7 @@ window.$K = (function () {
       this.xdate = null;
       this.mode = 0;
       this.format = 'd M Y';
-      this.date = new Date();
+      this.date = null;
       this.cdate = new Date();
       if (!$E('gcalendar_div')) {
         var div = document.createElement('div');
@@ -2711,7 +2707,7 @@ window.$K = (function () {
       var self = this;
       this.input.addEvent('click', function (e) {
         self.mode = 0;
-        self.cdate.setTime(self.date.valueOf());
+        self.cdate.setTime(self.date ? self.date.valueOf() : new Date());
         self._draw();
         GEvent.stop(e);
       });
@@ -2739,6 +2735,9 @@ window.$K = (function () {
             self._draw();
           }
           GEvent.stop(e);
+        } else if (key == 8) {
+          self.setDate(null);
+          GEvent.stop(e);
         }
       });
       $G(document.body).addEvent('click', function () {
@@ -2746,13 +2745,18 @@ window.$K = (function () {
       });
     },
     _dochanged: function () {
-      if (this.xdate && this.date > this.xdate) {
+      if (this.xdate && this.date && this.date > this.xdate) {
         this.date.setTime(this.xdate.valueOf());
-      } else if (this.mdate && this.date < this.mdate) {
+      } else if (this.mdate && this.date && this.date < this.mdate) {
         this.date.setTime(this.mdate.valueOf());
       }
-      this.cdate.setTime(this.date.valueOf());
-      this.input.value = this.date.format(this.format);
+      if (this.date) {
+        this.cdate.setTime(this.date.valueOf());
+        this.input.value = this.date.format(this.format);
+      } else {
+        this.cdate.setTime(new Date());
+        this.input.value = '';
+      }
       this.onchanged.call(this);
     },
     _toogle: function (e) {
@@ -2760,7 +2764,11 @@ window.$K = (function () {
         this.calendar.style.display = 'none';
       } else {
         this.mode = 0;
-        this.cdate.setTime(this.date.valueOf());
+        if (this.date) {
+          this.cdate.setTime(this.date.valueOf());
+        } else {
+          this.cdate.setTime(new Date());
+        }
         this._draw();
       }
       GEvent.stop(e);
@@ -2813,9 +2821,9 @@ window.$K = (function () {
       var today_month = today.getMonth() + 1;
       var today_year = today.getFullYear();
       var today_date = today.getDate();
-      var sel_month = this.date.getMonth() + 1;
-      var sel_year = this.date.getFullYear();
-      var sel_date = this.date.getDate();
+      var sel_month = this.date ? this.date.getMonth() + 1 : today_month;
+      var sel_year = this.date ? this.date.getFullYear() : today_year;
+      var sel_date = this.date ? this.date.getDate() : today_date;
       var r = 0;
       var c = 0;
       var bg, row, cell;
@@ -2954,6 +2962,9 @@ window.$K = (function () {
           }
           if (canclick) {
             $G(cell).addEvent('click', function (e) {
+              if (self.date === null) {
+                self.date = new Date();
+              }
               self.date.setTime(this.oDate.valueOf());
               self._dochanged();
               var input = $E(self.input);
@@ -2974,12 +2985,10 @@ window.$K = (function () {
           pointer++;
         }
       }
-      var vpo = this.input.viewportOffset();
-      var t = vpo.top + this.input.getHeight() + 5;
-      var dm = this.calendar.getDimensions();
-      var ch = document.viewport.getHeight();
-      var ct = document.viewport.getscrollTop();
-      if ((t + dm.height + 5) >= (ch + ct)) {
+      var vpo = this.input.viewportOffset(),
+        t = vpo.top + this.input.getHeight() + 5,
+        dm = this.calendar.getDimensions();
+      if ((t + dm.height + 5) >= (document.viewport.getHeight() + document.viewport.getscrollTop())) {
         this.calendar.style.top = (vpo.top - dm.height - 5) + 'px';
       } else {
         this.calendar.style.top = t + 'px';
@@ -3001,16 +3010,25 @@ window.$K = (function () {
       GEvent.stop(e);
     },
     moveDate: function (day) {
+      if (this.date === null) {
+        this.date = new Date();
+      }
       this.date.setDate(this.date.getDate() + day);
       this._dochanged();
       return this;
     },
     moveMonth: function (month) {
+      if (this.date === null) {
+        this.date = new Date();
+      }
       this.date.setMonth(this.date.getMonth() + month);
       this._dochanged();
       return this;
     },
     moveYear: function (year) {
+      if (this.date === null) {
+        this.date = new Date();
+      }
       this.date.setFullYear(this.date.getFullYear() + year);
       this._dochanged();
       return this;
@@ -3021,25 +3039,35 @@ window.$K = (function () {
       return this;
     },
     setDate: function (date) {
-      this.date = this._toDate(date);
+      if (date === '' || date === null) {
+        this.date = null;
+      } else {
+        this.date = this._toDate(date);
+      }
       this._dochanged();
       return this;
     },
     getDate: function () {
-      var d = new Date();
-      d.setTime(this.date.valueOf());
-      return d;
+      if (this.date) {
+        var d = new Date();
+        d.setTime(this.date.valueOf());
+        return d;
+      }
+      return null;
     },
     getDateFormat: function (format) {
-      format = format || this.format;
-      return this.getDate().format(format);
+      if (this.date) {
+        format = format || this.format;
+        return this.getDate().format(format);
+      }
+      return null;
     },
     minDate: function (date) {
       if (Object.isNull(date)) {
         if (this.mdate == null) {
           this.mdate = new Date();
         }
-        this.mdate.setTime(this.date.valueOf());
+        this.mdate.setTime(this.date ? this.date.valueOf() : new Date());
       } else {
         this.mdate = this._toDate(date);
       }
@@ -3050,7 +3078,7 @@ window.$K = (function () {
         if (this.xdate == null) {
           this.xdate = new Date();
         }
-        this.xdate.setTime(this.date.valueOf());
+        this.xdate.setTime(this.date ? this.date.valueOf() : new Date());
       } else {
         this.xdate = this._toDate(date);
       }

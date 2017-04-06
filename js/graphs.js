@@ -172,6 +172,8 @@
             self.drawLine();
           } else if (options.type == 'pie') {
             self.drawPie();
+          } else if (options.type == 'donut') {
+            self.drawDonut();
           } else if (options.type == 'hchart') {
             self.drawHChart();
           } else {
@@ -360,7 +362,7 @@
         context.closePath();
         context.fillStyle = options.colors[index % options.colors.length];
         context.fill();
-        context.lineWidth = 2;
+        context.lineWidth = 0;
         context.strokeStyle = self.backgroundColor;
         context.stroke();
         if (slice.percentage) {
@@ -382,8 +384,6 @@
         context.fillStyle = self.backgroundColor;
         context.beginPath();
         context.arc(centerX, centerY, radius + 2, 0, Math.PI * 2, false);
-        context.shadowColor = self.fontColor;
-        context.shadowBlur = 5;
         context.fill();
         context.restore();
         forEach(self.datas.rows[0].items, function (item, index) {
@@ -399,8 +399,134 @@
           context.lineWidth = 1;
           var offset = self.fontSize / 2;
           forEach(self.datas.labels, function (item, index) {
-            context.strokeStyle = self.fontColor;
-            context.strokeRect(x, y, self.fontSize, self.fontSize);
+            context.fillStyle = options.colors[index % options.colors.length];
+            context.fillRect(x, y, self.fontSize, self.fontSize);
+            context.fillStyle = self.fontColor;
+            context.fillText(item, x - 5, y + offset);
+            y = y + self.fontSize + 5;
+          });
+        }
+      }
+      drawGraph();
+      var _mouseMove = function (e) {
+        var currItem = null;
+        var offset = self.canvas.viewportOffset();
+        var pos = GEvent.pointer(e);
+        var mouseX = pos.x - offset.left;
+        var mouseY = pos.y - offset.top;
+        var xFromCenter = mouseX - centerX;
+        var yFromCenter = mouseY - centerY;
+        var distanceFromCenter = Math.sqrt(Math.pow(Math.abs(xFromCenter), 2) + Math.pow(Math.abs(yFromCenter), 2));
+        if (distanceFromCenter <= radius) {
+          var mouseAngle = Math.atan2(yFromCenter, xFromCenter) - chartStartAngle;
+          if (mouseAngle < 0) {
+            mouseAngle = 2 * Math.PI + mouseAngle;
+          }
+          forEach(self.datas.rows[0].items, function (item, index) {
+            if (mouseAngle >= item.startAngle && mouseAngle <= item.endAngle) {
+              currItem = item;
+              if (item.tooltip) {
+                self.tooltip.innerHTML = item.tooltip;
+              } else {
+                self.tooltip.innerHTML = self.subtitle + self.datas.labels[index] + '<br>' + self.datas.rows[0].title + ' ' + item.title;
+              }
+              var rc = self.tooltip.getDimensions();
+              self.tooltip.style.left = (pos.x - (rc.width / 2)) + 'px';
+              self.tooltip.style.top = (pos.y - 10 - rc.height) + 'px';
+              return true;
+            }
+          });
+        }
+        if (!currItem) {
+          if (self.hoverItem) {
+            self.canvas.style.cursor = 'default';
+            self.tooltip.hide();
+            self.tooltip.setStyle('opacity', 0);
+            self.hoverItem = null;
+          }
+        } else if (self.hoverItem !== currItem) {
+          self.canvas.style.cursor = 'pointer';
+          self.hoverItem = currItem;
+          self.tooltip.fadeTo(90);
+          self.tooltip.show();
+        }
+      };
+      if (this.loading) {
+        this.canvas.addEvent('mousemove', _mouseMove);
+      }
+    },
+    drawDonut: function () {
+      this.clear();
+      var options = this.options;
+      var self = this;
+      var context = this.context;
+      var centerX = options.centerX == null ? Math.round(this.width / 2) : options.centerX;
+      var centerY = options.centerY == null ? Math.round(this.height / 2) : options.centerY;
+      var radius = centerY - options.pieMargin;
+      var counter = 0.0;
+      var chartStartAngle = -.5 * Math.PI;
+      var sum = this.datas.rows[0].total;
+      var currentPullOutSlice = null;
+      var currentPullOutDistance = 20;
+      forEach(this.datas.rows[0].items, function (item, index) {
+        var fraction = item.value / sum;
+        item.startAngle = (counter * Math.PI * 2);
+        item.endAngle = ((counter + fraction) * Math.PI * 2);
+        item.midAngle = (counter + fraction / 2);
+        item.percentage = Math.round(fraction * 100);
+        counter += fraction;
+      });
+      function drawSlice(slice, index) {
+        var startAngle = slice.startAngle + chartStartAngle;
+        var endAngle = slice.endAngle + chartStartAngle;
+        context.beginPath();
+        context.moveTo(centerX, centerY);
+        context.arc(centerX, centerY, radius, startAngle, endAngle, false);
+        context.lineTo(centerX, centerY);
+        context.closePath();
+        context.fillStyle = options.colors[index % options.colors.length];
+        context.fill();
+        context.lineWidth = 1;
+        context.strokeStyle = self.backgroundColor;
+        context.stroke();
+        if (slice.percentage) {
+          var o = slice == currentPullOutSlice ? currentPullOutDistance : 0;
+          var distance = ((radius + o) / 2.5) * (Math.pow(1 - (2.5 / (radius + o)), 0.8) + 1) + options.labelOffset;
+          var labelX = Math.round(centerX + Math.sin(slice.midAngle * Math.PI * 2) * distance);
+          var labelY = Math.round(centerY - Math.cos(slice.midAngle * Math.PI * 2) * distance);
+          context.textAlign = 'center';
+          context.fillStyle = options.colors[index % options.colors.length];
+          if (options.strokeColor) {
+            context.strokeStyle = options.strokeColor;
+            context.strokeText(slice.percentage + '%', labelX, labelY);
+          }
+          context.fillText(slice.percentage + '%', labelX, labelY);
+        }
+      }
+      function drawGraph() {
+        context.save();
+        context.fillStyle = self.backgroundColor;
+        context.beginPath();
+        context.arc(centerX, centerY, radius + 2, 0, Math.PI * 2, false);
+        context.fill();
+        forEach(self.datas.rows[0].items, function (item, index) {
+          drawSlice(item, index);
+        });
+        context.fillStyle = self.backgroundColor;
+        context.beginPath();
+        context.arc(centerX, centerY, radius - 20, 0, Math.PI * 2, false);
+        context.fill();
+        context.restore();
+        if (options.showTitle) {
+          var x = self.width - 10;
+          var t = 10;
+          var y = t + self.fontSize;
+          x = x - self.fontSize - 10;
+          context.textAlign = 'right';
+          context.textBaseline = 'middle';
+          context.lineWidth = 1;
+          var offset = self.fontSize / 2;
+          forEach(self.datas.labels, function (item, index) {
             context.fillStyle = options.colors[index % options.colors.length];
             context.fillRect(x, y, self.fontSize, self.fontSize);
             context.fillStyle = self.fontColor;

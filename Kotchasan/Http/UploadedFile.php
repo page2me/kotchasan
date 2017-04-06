@@ -199,6 +199,7 @@ class UploadedFile implements UploadedFileInterface
         break;
       case UPLOAD_ERR_OK:
       case UPLOAD_ERR_NO_FILE:
+        return null;
         break;
       default:
         return sprintf('The file "%s" was not uploaded due to an unknown error.', $this->getClientFilename());

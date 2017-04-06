@@ -405,7 +405,7 @@ class DataTable extends \Kotchasan\KBase
           if ($q) {
             $qs[] = $q;
           }
-        } else {
+        } elseif (is_string($key)) {
           $qs[] = array($key, $items['value']);
         }
       }
@@ -417,8 +417,8 @@ class DataTable extends \Kotchasan\KBase
     }
     // ปุ่ม Go
     if (!empty($form)) {
-      $form[] = '<fieldset>';
-      $form[] = '<input type=submit class="button go" value="'.Language::get('Go').'">';
+      $form[] = '<fieldset class=go>';
+      $form[] = '<button type=submit class="button go">'.Language::get('Go').'</button>';
       $form[] = implode('', $hidden_fields);
       $form[] = '</fieldset>';
     }
@@ -438,9 +438,9 @@ class DataTable extends \Kotchasan\KBase
         }
         $this->uri = $this->uri->withParams(array('search' => $search));
       }
-      $form[] = '&nbsp;<fieldset class=search>';
-      $form[] = '<label accesskey=f class="icon-search"><input type=text name=search value="'.$search.'" placeholder="'.Language::get('Search').'"></label>';
-      $form[] = '<input type=submit value="&nbsp;">';
+      $form[] = '<fieldset class=search>';
+      $form[] = '<label accesskey=f><input type=text name=search value="'.$search.'" placeholder="'.Language::get('Search').'"></label>';
+      $form[] = '<button type=submit>&#xe607;</button>';
       $form[] = '</fieldset>';
     }
     if (!empty($form)) {
@@ -590,14 +590,22 @@ class DataTable extends \Kotchasan\KBase
           $colspan--;
         }
       }
-      if (!empty($this->buttons)) {
-        $row[] = $this->th($i, '', array('text' => ''));
-        $colCount++;
-        $i++;
+      if ($colspan === 0) {
+        if (!empty($this->buttons)) {
+          $row[] = $this->th($i, '', array('text' => ''));
+          $colCount++;
+          $i++;
+        }
+      } else {
+        $colspan--;
       }
-      if ($this->pmButton) {
-        $row[] = $this->th($i, '', array('text' => ''));
-        $colCount++;
+      if ($colspan === 0) {
+        if ($this->pmButton) {
+          $row[] = $this->th($i, '', array('text' => ''));
+          $colCount++;
+        }
+      } else {
+        $colspan--;
       }
       // thead
       $content[] = '<thead><tr>'.implode('', $row).'</tr></thead>';

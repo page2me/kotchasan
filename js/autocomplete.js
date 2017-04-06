@@ -127,9 +127,17 @@
                   } else {
                     display.setValue(xhr.responseText);
                   }
-                  display.style.left = input.getLeft() + 'px';
-                  display.style.top = (input.getTop() + input.getHeight() + 5) + 'px';
-                  display.style.width = input.getWidth() + 'px';
+                  var vp = input.viewportOffset(),
+                    dm = input.getDimensions(),
+                    cw = document.viewport.getWidth();
+                  display.style.width = dm.width + 'px';
+                  display.style.left = Math.max(0, (vp.left + dm.width > cw ? cw - dm.width : vp.left)) + 'px';
+                  var h = display.getDimensions().height;
+                  if ((vp.top + dm.height + 5 + h) >= (document.viewport.getHeight() + document.viewport.getscrollTop())) {
+                    display.style.top = (vp.top - h - 5) + 'px';
+                  } else {
+                    display.style.top = (vp.top + dm.height + 5) + 'px';
+                  }
                   showing = true;
                 } else {
                   _hide();

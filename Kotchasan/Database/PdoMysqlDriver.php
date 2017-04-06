@@ -9,9 +9,9 @@
 namespace Kotchasan\Database;
 
 use \Kotchasan\Database\Driver;
-use \Kotchasan\ArrayTool;
 use \PDO;
 use \Kotchasan\Database\QueryBuilder;
+use \Kotchasan\Database\Sql;
 
 /**
  * PDO MySQL Database Adapter Class
@@ -169,9 +169,13 @@ class PdoMysqlDriver extends Driver
     $keys = array();
     $values = array();
     foreach ($save as $key => $value) {
-      if (preg_match('/^\([A-Z0-9\+\s\(]{0,}SELECT\s.*\)$/', $value)) {
+      if ($value instanceof QueryBuilder) {
         $keys[] = $key;
-        $values[] = $value;
+        $values[] = '('.$value->text().')';
+      } elseif ($value instanceof Sql) {
+        $keys[] = $key;
+        $values[] = $value->text();
+        $params = $value->getValues($params);
       } else {
         $keys[] = $key;
         $values[] = ':'.$key;
@@ -195,7 +199,7 @@ class PdoMysqlDriver extends Driver
     try {
       $query = $this->connection->prepare($sql);
       $query->execute($params);
-      $this->log(__FUNCTION__, $sql, $params);
+      $this->log('insert', $sql, $params);
       self::$query_count++;
       return (int)$this->connection->lastInsertId();
     } catch (PDOException $e) {
@@ -216,17 +220,17 @@ class PdoMysqlDriver extends Driver
   public function insertOrUpdate($table_name, $save, $update = array())
   {
     $updates = array();
+    $params = array();
     if (empty($update)) {
       foreach ($save as $key => $value) {
         $updates[] = '`'.$key.'`=VALUES(`'.$key.'`)';
       }
     } else {
       foreach ($save as $key => $value) {
-        $updates[] = ':u'.$key;
-        $params[':u'.$key] = $value;
+        $updates[] = ':'.$key;
+        $params[':'.$key] = $value;
       }
     }
-    $params = array();
     $sql = $this->makeInsert($table_name, $save, $params);
     $sql .= ' ON DUPLICATE KEY UPDATE '.implode(', ', $updates);
     try {
@@ -305,35 +309,6 @@ class PdoMysqlDriver extends Driver
   }
 
   /**
-   * ฟังก์ชั่นสร้าง SQL สำหรับหาค่าสูงสุด + 1
-   * ใช้ในการหาค่า id ถัดไป
-   *
-   * @param string $field ชื่อฟิลด์ที่ต้องการหาค่าสูงสุด
-   * @param string $table_name ชื่อตาราง
-   * @param mixed $condition query WHERE
-   * @param string $alias ชื่อของผลลัพท์ ถ้าไม่ระบุจะเป็นชื่อเดียวกับชื่อฟิลด์
-   * @return string SQL Command
-   *
-   * @assert ('id', '`world`', array(array('module_id', 'D.id'))) [==] '(1 + IFNULL((SELECT MAX(`id`) FROM `world` AS X WHERE `module_id` = D.`id`), 0)) AS `id`'
-   * @assert ('id', '`world`', array(array('module_id', 'D.id')), false) [==] '(1 + IFNULL((SELECT MAX(`id`) FROM `world` AS X WHERE `module_id` = D.`id`), 0)) AS `id`'
-   * @assert ('id', '`world`', array(array('module_id', 'D.id')), 'next_id') [==] '(1 + IFNULL((SELECT MAX(`id`) FROM `world` AS X WHERE `module_id` = D.`id`), 0)) AS `next_id`'
-   * @assert ('id', '`world`', array(array('module_id', 'D.id')), null) [==] '(1 + IFNULL((SELECT MAX(`id`) FROM `world` AS X WHERE `module_id` = D.`id`), 0))'
-   */
-  public function buildNext($field, $table_name, $condition = null, $alias = '')
-  {
-    if (empty($condition)) {
-      $condition = '';
-    } else {
-      $condition = ' WHERE '.$this->buildWhere($condition);
-    }
-    $q = '(1 + IFNULL((SELECT MAX(`'.$field.'`) FROM '.$table_name.' AS X'.$condition.'), 0))';
-    if ($alias !== null) {
-      $q .= ' AS `'.(empty($alias) ? $field : $alias).'`';
-    }
-    return $q;
-  }
-
-  /**
    * เรียกดูข้อมูล
    *
    * @param string $table_name ชื่อตาราง
@@ -397,19 +372,18 @@ class PdoMysqlDriver extends Driver
     foreach ($save as $key => $value) {
       if ($value instanceof QueryBuilder) {
         $sets[] = '`'.$key.'` = ('.$value->text().')';
-      } elseif (preg_match('/^\([A-Z0-9\+\s\(]{0,}SELECT\s.*\)$/', $value)) {
-        $sets[] = '`'.$key.'` = '.$value;
+      } elseif ($value instanceof Sql) {
+        $sets[] = '`'.$key.'` = '.$value->text();
+        $values = $value->getValues($values);
       } else {
-        $sets[] = '`'.$key.'` = :_'.$key;
-        $values[':_'.$key] = $value;
+        $k = ':'.$key.sizeof($values);
+        $sets[] = '`'.$key.'` = '.$k;
+        $values[$k] = $value;
       }
     }
-    $condition = $this->buildWhere($condition);
-    if (is_array($condition)) {
-      $values = ArrayTool::replace($values, $condition[1]);
-      $condition = $condition[0];
-    }
-    $sql = 'UPDATE '.$table_name.' SET '.implode(', ', $sets).' WHERE '.$condition;
+    $q = Sql::WHERE($condition);
+    $sql = 'UPDATE '.$table_name.' SET '.implode(', ', $sets).' WHERE '.$q->text();
+    $values = $q->getValues($values);
     try {
       $query = $this->connection->prepare($sql);
       $query->execute($values);
