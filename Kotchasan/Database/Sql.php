@@ -100,12 +100,17 @@ class Sql
   {
     if ($column_name instanceof self) {
       return $column_name->text();
-    } elseif (preg_match('/^([A-Z0-9]{1,2}\.)?`?([a-zA-Z0-9_]+)`?$/', $column_name, $match)) {
-      // U.id, U1.id, field_name
-      return "$match[1]`$match[2]`";
-    } elseif (preg_match('/^`?([a-zA-Z0-9_]+)`?\.`?([a-zA-Z0-9_]+)`?$/', $column_name, $match)) {
-      // table_name.field_name
-      return "`$match[1]`.`$match[2]`";
+    } elseif (is_numeric($column_name)) {
+      // ตัวเลขเท่านั้น
+      return $column_name;
+    } elseif (is_string($column_name)) {
+      if (preg_match('/^([A-Z0-9]{1,2}\.)?`?([a-zA-Z0-9_]+)`?$/', $column_name, $match)) {
+        // U.id, U1.id, field_name
+        return "$match[1]`$match[2]`";
+      } elseif (preg_match('/^`?([a-zA-Z0-9_]+)`?\.`?([a-zA-Z0-9_]+)`?$/', $column_name, $match)) {
+        // table_name.field_name
+        return "`$match[1]`.`$match[2]`";
+      }
     }
     throw new \InvalidArgumentException('Invalid arguments in fieldName');
   }
@@ -136,6 +141,7 @@ class Sql
    * @assert WHERE(array(array('id', array(1, 'a')), array('id', array('G.id', 'G.`id2`'))))->text() [==] "`id` IN (1, 'a') AND `id` IN ('G.id', G.`id2`)"
    * @assert WHERE(array(Sql::YEAR('create_date'), Sql::YEAR('`create_date`')))->text() [==] "YEAR(`create_date`) = YEAR(`create_date`)"
    * @assert WHERE(array('ip', 'NOT IN', array('', '192.168.1.2')))->text() [==] "`ip` NOT IN ('', '192.168.1.2')"
+   * @assert (array(1, 1))->text() [==] "1 = 1"
    */
   public static function WHERE($condition, $operator = 'AND', $id = 'id')
   {
