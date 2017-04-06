@@ -846,8 +846,6 @@
         forEach(this.datas.rows, function (item, index) {
           context.fillStyle = self.fontColor;
           context.fillText(item.title, x - 5, t + offset);
-          context.strokeStyle = self.fontColor;
-          context.strokeRect(x, t, self.fontSize, self.fontSize);
           context.fillStyle = self.options.colors[index % self.options.colors.length];
           context.fillRect(x, t, self.fontSize, self.fontSize);
           t = t + self.fontSize + 5;
