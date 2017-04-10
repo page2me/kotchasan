@@ -42,9 +42,13 @@
         } else {
           locs = locs[0].split('?');
           locs = locs[1] ? locs[1] : 'module=' + FIRST_MODULE;
-          if (locs != temp.lasturl) {
+          if (locs != temp.lasturl && temp.myhistory.length > 0) {
             temp.lasturl = locs;
-            temp.req.send(reader, temp.lasturl, callback);
+            temp.myhistory.push(locs);
+            if (temp.myhistory.length > 2) {
+              temp.myhistory.shift();
+            }
+            temp.req.send(reader, locs, callback);
           }
         }
       }, 100);

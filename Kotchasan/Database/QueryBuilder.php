@@ -382,7 +382,7 @@ class QueryBuilder extends \Kotchasan\Database\Query
   /**
    * สร้าง query เรียงลำดับ
    *
-   * @param mixed $sort array('field ASC','field DESC') หรือ 'field ASC', 'field DESC', ....
+   * @param mixed $sorts array('field ASC','field DESC') หรือ 'field ASC', 'field DESC', ....
    * @return \static
    *
    * @assert order('id', 'id ASC')->text() [==] " ORDER BY `id`, `id` ASC"
@@ -410,7 +410,7 @@ class QueryBuilder extends \Kotchasan\Database\Query
    * @assert select('"email" name', '0 id', '0 `ไอดี`')->text() [==] "SELECT 'email' AS `name`,0 AS `id`,0 AS `ไอดี`"
    * @assert select("'email' name", '0 AS id', '0 AS ไอดี')->text() [==] "SELECT 'email' AS `name`,0 AS `id`,0 AS `ไอดี`"
    * @assert select()->text()  [==] "SELECT *"
-   * @assert select()->where(array('domain', 'kotchasan.com'))->text() [==] "SELECT * WHERE `domain` = 'kotchasan.com'"
+   * @assert select()->where(array('domain', Sql::strValue('kotchasan.com')))->text() [==] "SELECT * WHERE `domain` = 'kotchasan.com'"
    * @assert select('name `ชื่อ นามสกุล`', 'U.`idcard` AS `เลขประชาชน`')->text() [==] "SELECT `name` AS `ชื่อ นามสกุล`,U.`idcard` AS `เลขประชาชน`"
    * @assert select('table.field', '`table`.`field`')->text() [==] "SELECT `table`.`field`,`table`.`field`"
    * @assert select('table.field field', '`table`.`field` `field`')->text() [==] "SELECT `table`.`field` AS `field`,`table`.`field` AS `field`"
@@ -612,6 +612,8 @@ class QueryBuilder extends \Kotchasan\Database\Query
    * @assert where(1)->text() [==] " WHERE `id` = 1"
    * @assert where(array('id', 1))->text() [==] " WHERE `id` = 1"
    * @assert where(array('id', '1'))->text() [==] " WHERE `id` = '1'"
+   * @assert where(array(1, 1))->text() [==] " WHERE 1 = 1"
+   * @assert where(array('U.id', 'G.id'))->text() [==] " WHERE U.`id` = G.`id`"
    * @assert where(array('date', '2016-1-1 30:30'))->text() [==] " WHERE `date` = '2016-1-1 30:30'"
    * @assert where(array('id', '=', 1))->text() [==] " WHERE `id` = 1"
    * @assert where(Sql::create('`id`=1 OR (SELECT ....)'))->text() [==] " WHERE `id`=1 OR (SELECT ....)"
@@ -619,10 +621,12 @@ class QueryBuilder extends \Kotchasan\Database\Query
    * @assert where(array('id', 'IN', array(1, 2, '3')))->text() [==] " WHERE `id` IN (1, 2, '3')"
    * @assert where(array(array('fb', '0'), Sql::create('(...)')))->text() [==] " WHERE `fb` = '0' AND (...)"
    * @assert where(array(array(Sql::MONTH('create_date'), 1), array(Sql::YEAR('create_date'), 1)))->text() [==] " WHERE MONTH(`create_date`) = 1 AND YEAR(`create_date`) = 1"
-   * @assert where(array(array('id', array(1, 'a')), array('id', array('G.id', 'G.`id2`'))))->text() [==] " WHERE `id` IN (1, 'a') AND `id` IN ('G.id', G.`id2`)"
+   * @assert where(array(array('id', array(1, 'a')), array('id', array('G.id', 'G.`id2`'))))->text() [==] " WHERE `id` IN (1, 'a') AND `id` IN (G.`id`, G.`id2`)"
+   * @assert where(array(array('id', array(1, 'a')), array('id', array('', 'th'))))->text() [==] " WHERE `id` IN (1, 'a') AND `id` IN ('', 'th')"
    * @assert where(array('ip', 'NOT IN', array('', '192.168.1.104')))->text() [==] " WHERE `ip` NOT IN ('', '192.168.1.104')"
    * @assert where(array('U.id', '(SELECT CASE END)'))->text() [==] " WHERE U.`id` = '(SELECT CASE END)'"
    * @assert where(array(array(Sql::YEAR('create_date'), Sql::YEAR('S.`create_date`'))))->text() [==] " WHERE YEAR(`create_date`) = YEAR(S.`create_date`)"
+   * @assert where(array('U.id', Sql::strValue('G.id')))->text('U.`id`') [==] " WHERE U.`id` = 'G.id'"
    */
   public function where($condition, $oprator = 'AND', $id = 'id')
   {

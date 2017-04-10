@@ -207,7 +207,7 @@ class Response extends Message implements ResponseInterface
     header(sprintf('HTTP/%s %s %s', $this->protocol, $this->statusCode, $this->getReasonPhrase()), true, $this->statusCode);
     foreach ($this->headers as $name => $values) {
       foreach ($values as $value) {
-        header($name.': '.$value, false, $this->statusCode);
+        header($name.': '.$value);
       }
     }
     return $this;

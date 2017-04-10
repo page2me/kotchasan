@@ -45,12 +45,22 @@ class Sql
 
   /**
    * คืนค่าคำสั่ง SQL เป็น string
+   * ถ้า $sql เป็น null จะคืนค่า :$key ใช้สำหรับการ bind
    *
+   * @param string $key
    * @return string
    */
-  public function text()
+  public function text($key = null)
   {
-    return $this->sql;
+    if ($this->sql === null) {
+      if (is_string($key) && $key != '') {
+        return ':'.preg_replace('/[\.`]/', '', strtolower($key));
+      } else {
+        throw new \InvalidArgumentException('$key must be a non-empty string');
+      }
+    } else {
+      return $this->sql;
+    }
   }
 
   /**
@@ -138,7 +148,8 @@ class Sql
    * @assert WHERE(array(array('id', 'IN', array(1, '2', null))))->text() [==] "`id` IN (1, '2', NULL)"
    * @assert WHERE(array(array('U.id', 1), array('U.id', '!=', '1')))->text() [==] "U.`id` = 1 AND U.`id` != '1'"
    * @assert WHERE(array(array(Sql::MONTH('create_date'), 1), array(Sql::YEAR('create_date'), 1)))->text() [==] "MONTH(`create_date`) = 1 AND YEAR(`create_date`) = 1"
-   * @assert WHERE(array(array('id', array(1, 'a')), array('id', array('G.id', 'G.`id2`'))))->text() [==] "`id` IN (1, 'a') AND `id` IN ('G.id', G.`id2`)"
+   * @assert WHERE(array(array('id', array(1, 'a')), array('id', array('G.id', 'G.`id2`'))))->text() [==] "`id` IN (1, 'a') AND `id` IN (G.`id`, G.`id2`)"
+   * @assert WHERE(array(array('id', array('', 'th'))))->text() [==] "`id` IN ('', 'th')"
    * @assert WHERE(array(Sql::YEAR('create_date'), Sql::YEAR('`create_date`')))->text() [==] "YEAR(`create_date`) = YEAR(`create_date`)"
    * @assert WHERE(array('ip', 'NOT IN', array('', '192.168.1.2')))->text() [==] "`ip` NOT IN ('', '192.168.1.2')"
    * @assert (array(1, 1))->text() [==] "1 = 1"
@@ -182,8 +193,12 @@ class Sql
         }
         $sql = $key.' '.$operator.' '.self::quoteValue($key, $value, $values);
       }
-    } elseif ($condition instanceof self || $condition instanceof QueryBuilder) {
-      // Sql หรือ QueryBuilder ไม่มี column_name
+    } elseif ($condition instanceof QueryBuilder) {
+      // QueryBuilder ไม่มี column_name
+      $sql = $condition->text();
+      $values = $condition->getValues($values);
+    } elseif ($condition instanceof self) {
+      // Sql ไม่มี column_name
       $sql = $condition->text();
       $values = $condition->getValues($values);
     } else {
@@ -207,9 +222,9 @@ class Sql
    * @assert ('id', 123456) [==] 123456
    * @assert ('id', 0.1) [==] 0.1
    * @assert ('id', null) [==] 'NULL'
-   * @assert ('id', 'U.id') [==] "'U.id'"
+   * @assert ('id', 'U.id') [==] "U.`id`"
    * @assert ('id', 'U.`id`') [==] 'U.`id`'
-   * @assert ('id', 'table_name.id') [==] "'table_name.id'"
+   * @assert ('id', 'table_name.id') [==] "`table_name`.`id`"
    * @assert ('id', '`table_name`.`id`') [==] '`table_name`.`id`'
    * @assert ('id', 'INSERT INTO') [==] ':id0'
    * @assert ('id', array(1, '2', null)) [==] "(1, '2', NULL)"
@@ -234,22 +249,28 @@ class Sql
       if (preg_match('/^([0-9\s\r\n\t\.\_\-:]+)$/', $value)) {
         // ตัวเลข จำนวนเงิน เบอร์โทร วันที่
         $sql = "'$value'";
-      } elseif (preg_match('/^(`?[a-zA-Z0-9_\-]+`?\.`?)?`[a-zA-Z0-9_\-]+`$/', $value) && !preg_match('/0x[0-9]+/is', $value)) {
-        // ชื่อฟิลด์ต้องอยู่ภายใต้ `` เช่น U.`id` `table_name`.`id`
-        $sql = $value;
-      } elseif (!preg_match('/[\s\r\n\t`;\(\)\*\=<>\/\'"]+/s', $value) && !preg_match('/(UNION|INSERT|DELETE|DROP|0x[0-9]+)/is', $value)) {
-        // ข้อความที่ไม่มีช่องว่างหรือรหัสที่อาจเป็น SQL
-        $sql = "'$value'";
-      } else {
+      } elseif (preg_match('/0x[0-9]+/is', $value)) {
+        // 0x
         $sql = ':'.strtolower(preg_replace('/[`\.\s\-_]+/', '', $column_name)).sizeof($values);
         $values[$sql] = $value;
+      } else {
+        if (preg_match('/^(([A-Z0-9]{1,2})|`?([a-zA-Z0-9_]+)`?)\.`?([a-zA-Z0-9_]+)`?$/', $value, $match)) {
+          // U.id U.`id` U1.id U1.`id` table_name.module_id `table_name`.`module_id`
+          $sql = $match[3] == '' ? "$match[2].`$match[4]`" : "`$match[3]`.`$match[4]`";
+        } elseif (!preg_match('/[\s\r\n\t`;\(\)\*\=<>\/\'"]+/s', $value) && !preg_match('/(UNION|INSERT|DELETE|DROP|0x[0-9]+)/is', $value)) {
+          // ข้อความที่ไม่มีช่องว่างหรือรหัสที่อาจเป็น SQL
+          $sql = "'$value'";
+        } else {
+          $sql = ':'.strtolower(preg_replace('/[`\.\s\-_]+/', '', $column_name)).sizeof($values);
+          $values[$sql] = $value;
+        }
       }
     } elseif (is_numeric($value)) {
       // ตัวเลข
       $sql = $value;
     } elseif ($value instanceof self) {
       // Sql
-      $sql = $value->text();
+      $sql = $value->text($column_name);
       $values = $value->getValues($values);
     } elseif ($value instanceof QueryBuilder) {
       // QueryBuilder
@@ -462,5 +483,35 @@ class Sql
   public static function GROUP_CONCAT($column_name, $separator = ',', $alias = null, $distinct = false, $order = null)
   {
     return self::create('GROUP_CONCAT('.($distinct ? 'DISTINCT ' : '').self::fieldName($column_name)." SEPARATOR '$separator')".($alias ? " AS `$alias`" : ''));
+  }
+
+  /**
+   * ค้นหาข้อความ ไม่พบคืนค่า 0, ตัวแรกคือ 1
+   *
+   * @param string $substr ข้อความที่ค้นหา ถ้าเป็นชื่อฟิลด์ต้องครอบด้วย ``
+   * @param string $str ข้อความต้นฉบับ ถ้าเป็นชื่อฟิลด์ต้องครอบด้วย ``
+   * @param string|null $alias ชื่อรองที่ต้องการ ถ้าไม่ระบุไม่มีชื่อรอง
+   * @param int $pos ตำแหน่งเริ่มต้นค้นหา 0 (default) หรือไม่ระบุ ค้นหาตั้งแต่ตัวแรก
+   * @return \self
+   *
+   * @assert ('find', 'C.`topic`')->text() [==] "LOCATE('find', C.`topic`)"
+   */
+  public static function POSITION($substr, $str, $alias = null, $pos = 0)
+  {
+    $substr = strpos($substr, '`') === false ? "'$substr'" : $substr;
+    $str = strpos($str, '`') === false ? "'$str'" : $str;
+    return self::create("LOCATE($substr, $str".(empty($pos) ? ')' : ", $pos)").($alias ? " AS `$alias`" : ''));
+  }
+
+  /**
+   * ฟังก์ชั่นสำหรับรับค่าเป็นสตริงค์เท่านั้น
+   * ผลลัพท์จะถูกครอบด้วย '' (ฟันหนู)
+   *
+   * @param string $value
+   * @return \self
+   */
+  public static function strValue($value)
+  {
+    return self::create("'$value'");
   }
 }
