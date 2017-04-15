@@ -1,5 +1,4 @@
 <?php
-
 namespace Kotchasan;
 
 /**
@@ -7,64 +6,64 @@ namespace Kotchasan;
  */
 class PasswordTest extends \PHPUnit_Framework_TestCase
 {
-	/**
-	 * @var Password
-	 */
-	protected $object;
+    /**
+     * @var Password
+     */
+    protected $object;
 
-	/**
-	 * Sets up the fixture, for example, opens a network connection.
-	 * This method is called before a test is executed.
-	 */
-	protected function setUp()
-	{
-		$this->object = new Password('1234567890');
-	}
+    /**
+     * Sets up the fixture, for example, opens a network connection.
+     * This method is called before a test is executed.
+     */
+    protected function setUp()
+    {
+        $this->object = new Password('1234567890');
+    }
 
-	/**
-	 * Tears down the fixture, for example, closes a network connection.
-	 * This method is called after a test is executed.
-	 */
-	protected function tearDown()
-	{
+    /**
+     * Tears down the fixture, for example, closes a network connection.
+     * This method is called after a test is executed.
+     */
+    protected function tearDown()
+    {
 
-	}
+    }
 
-	/**
-	 * Generated from @assert ($this->object->encode("ทดสอบภาษาไทย")) [==] "ทดสอบภาษาไทย".
-	 *
-	 * @covers Kotchasan\Password::decode
-	 */
-	public function testDecode()
-	{
+    /**
+     * Generated from @assert ($this->object->encode("ทดสอบภาษาไทย")) [==] "ทดสอบภาษาไทย".
+     *
+     * @covers Kotchasan\Password::decode
+     */
+    public function testDecode()
+    {
 
-		$this->assertEquals(
-		"ทดสอบภาษาไทย", $this->object->decode($this->object->encode("ทดสอบภาษาไทย"))
-		);
-	}
+        $this->assertEquals(
+        "ทดสอบภาษาไทย", $this->object->decode($this->object->encode("ทดสอบภาษาไทย"))
+        );
+    }
 
-	/**
-	 * Generated from @assert ($this->object->encode(1234)) [==] 1234.
-	 *
-	 * @covers Kotchasan\Password::decode
-	 */
-	public function testDecode2()
-	{
+    /**
+     * Generated from @assert ($this->object->encode(1234)) [==] 1234.
+     *
+     * @covers Kotchasan\Password::decode
+     */
+    public function testDecode2()
+    {
 
-		$this->assertEquals(
-		1234, $this->object->decode($this->object->encode(1234))
-		);
-	}
+        $this->assertEquals(
+        1234, $this->object->decode($this->object->encode(1234))
+        );
+    }
 
-	/**
-	 * @covers Kotchasan\Password::encode
-	 * @todo   Implement testEncode().
-	 */
-	public function testEncode()
-	{
-		// Remove the following lines when you implement this test.
-		$this->markTestIncomplete(
-		'This test has not been implemented yet.'
-		);
-	}
+    /**
+     * @covers Kotchasan\Password::encode
+     * @todo   Implement testEncode().
+     */
+    public function testEncode()
+    {
+        // Remove the following lines when you implement this test.
+        $this->markTestIncomplete(
+        'This test has not been implemented yet.'
+        );
+    }
 }

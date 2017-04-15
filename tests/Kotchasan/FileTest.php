@@ -1,5 +1,4 @@
 <?php
-
 namespace Kotchasan;
 
 /**
@@ -7,57 +6,57 @@ namespace Kotchasan;
  */
 class FileTest extends \PHPUnit_Framework_TestCase
 {
-	/**
-	 * @var File
-	 */
-	protected $object;
+    /**
+     * @var File
+     */
+    protected $object;
 
-	/**
-	 * Sets up the fixture, for example, opens a network connection.
-	 * This method is called before a test is executed.
-	 */
-	protected function setUp()
-	{
-		$this->object = new File;
-	}
+    /**
+     * Sets up the fixture, for example, opens a network connection.
+     * This method is called before a test is executed.
+     */
+    protected function setUp()
+    {
+        $this->object = new File;
+    }
 
-	/**
-	 * Tears down the fixture, for example, closes a network connection.
-	 * This method is called after a test is executed.
-	 */
-	protected function tearDown()
-	{
+    /**
+     * Tears down the fixture, for example, closes a network connection.
+     * This method is called after a test is executed.
+     */
+    protected function tearDown()
+    {
 
-	}
+    }
 
-	/**
-	 * Generated from @assert ('index.php.sql') [==] 'sql'.
-	 *
-	 * @covers Kotchasan\File::ext
-	 */
-	public function testExt()
-	{
-		$this->assertEquals(
-		'sql', \Kotchasan\File::ext('index.php.sql')
-		);
-	}
+    /**
+     * Generated from @assert ('index.php.sql') [==] 'sql'.
+     *
+     * @covers Kotchasan\File::ext
+     */
+    public function testExt()
+    {
+        $this->assertEquals(
+        'sql', \Kotchasan\File::ext('index.php.sql')
+        );
+    }
 
-	/**
-	 * @covers Kotchasan\File::makeDirectory
-	 * @todo   Implement testMakeDirectory().
-	 */
-	public function testFile()
-	{
-		$this->object->makeDirectory('temp/');
-		$this->object->makeDirectory('temp/test/');
-		$f = fopen('temp/test/index.php', 'w');
-		fclose($f);
-		$this->object->copyDirectory('temp/test/', 'temp/');
-		$result = array();
-		$this->object->listFiles('temp/test/', $result);
-		$this->object->removeDirectory('temp/');
-		$this->assertEquals(
-		array('temp/test/index.php'), $result
-		);
-	}
+    /**
+     * @covers Kotchasan\File::makeDirectory
+     * @todo   Implement testMakeDirectory().
+     */
+    public function testFile()
+    {
+        $this->object->makeDirectory('temp/');
+        $this->object->makeDirectory('temp/test/');
+        $f = fopen('temp/test/index.php', 'w');
+        fclose($f);
+        $this->object->copyDirectory('temp/test/', 'temp/');
+        $result = array();
+        $this->object->listFiles('temp/test/', $result);
+        $this->object->removeDirectory('temp/');
+        $this->assertEquals(
+        array('temp/test/index.php'), $result
+        );
+    }
 }

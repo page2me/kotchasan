@@ -7,6 +7,7 @@
  * @copyright 2015 Goragod.com
  * @license http://www.kotchasan.com/license/
  */
+
 $_SERVER['HTTP_HOST'] = 'localhost';
 $_SERVER['DOCUMENT_ROOT'] = dirname(dirname(__FILE__)).'/';
 // ตัวแปรที่จำเป็นสำหรับ Framework ใช้ระบุ root folder
