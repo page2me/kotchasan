@@ -1,5 +1,5 @@
 <?php
-/*
+/**
  * @filesource Kotchasan/Database/Schema.php
  * @link http://www.kotchasan.com/
  * @copyright 2016 Goragod.com
@@ -29,7 +29,7 @@ class Schema
   /**
    * Database object
    *
-   * @var	 Driver
+   * @var     Driver
    */
   private $db;
 

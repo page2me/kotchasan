@@ -1,5 +1,4 @@
 <?php
-
 namespace Kotchasan;
 
 /**
@@ -7,103 +6,103 @@ namespace Kotchasan;
  */
 class ValidatorTest extends \PHPUnit_Framework_TestCase
 {
-	/**
-	 * @var Validator
-	 */
-	protected $object;
+    /**
+     * @var Validator
+     */
+    protected $object;
 
-	/**
-	 * Sets up the fixture, for example, opens a network connection.
-	 * This method is called before a test is executed.
-	 */
-	protected function setUp()
-	{
-		$this->object = new Validator();
-	}
+    /**
+     * Sets up the fixture, for example, opens a network connection.
+     * This method is called before a test is executed.
+     */
+    protected function setUp()
+    {
+        $this->object = new Validator();
+    }
 
-	/**
-	 * Tears down the fixture, for example, closes a network connection.
-	 * This method is called after a test is executed.
-	 */
-	protected function tearDown()
-	{
+    /**
+     * Tears down the fixture, for example, closes a network connection.
+     * This method is called after a test is executed.
+     */
+    protected function tearDown()
+    {
 
-	}
+    }
 
-	/**
-	 * Generated from @assert ('admin@localhost.com') [==] true.
-	 *
-	 * @covers Kotchasan\Validator::email
-	 */
-	public function testEmail()
-	{
+    /**
+     * Generated from @assert ('admin@localhost.com') [==] true.
+     *
+     * @covers Kotchasan\Validator::email
+     */
+    public function testEmail()
+    {
 
-		$this->assertTrue(
-			\Kotchasan\Validator::email('admin@localhost.com')
-		);
-	}
+        $this->assertTrue(
+            \Kotchasan\Validator::email('admin@localhost.com')
+        );
+    }
 
-	/**
-	 * Generated from @assert ('admin@localhost') [==] true.
-	 *
-	 * @covers Kotchasan\Validator::email
-	 */
-	public function testEmail2()
-	{
+    /**
+     * Generated from @assert ('admin@localhost') [==] true.
+     *
+     * @covers Kotchasan\Validator::email
+     */
+    public function testEmail2()
+    {
 
-		$this->assertTrue(
-			\Kotchasan\Validator::email('admin@localhost')
-		);
-	}
+        $this->assertTrue(
+            \Kotchasan\Validator::email('admin@localhost')
+        );
+    }
 
-	/**
-	 * Generated from @assert ('ทดสอบ@localhost') [==] false.
-	 *
-	 * @covers Kotchasan\Validator::email
-	 */
-	public function testEmail3()
-	{
+    /**
+     * Generated from @assert ('ทดสอบ@localhost') [==] false.
+     *
+     * @covers Kotchasan\Validator::email
+     */
+    public function testEmail3()
+    {
 
-		$this->assertFalse(
-			\Kotchasan\Validator::email('ทดสอบ@localhost')
-		);
-	}
+        $this->assertFalse(
+            \Kotchasan\Validator::email('ทดสอบ@localhost')
+        );
+    }
 
-	/**
-	 * Generated from @assert ('0123456789016') [==] true.
-	 *
-	 * @covers Kotchasan\Validator::idCard
-	 */
-	public function testIdCard()
-	{
+    /**
+     * Generated from @assert ('0123456789016') [==] true.
+     *
+     * @covers Kotchasan\Validator::idCard
+     */
+    public function testIdCard()
+    {
 
-		$this->assertTrue(
-			\Kotchasan\Validator::idCard('0123456789016')
-		);
-	}
+        $this->assertTrue(
+            \Kotchasan\Validator::idCard('0123456789016')
+        );
+    }
 
-	/**
-	 * Generated from @assert ('0123456789015') [==] false.
-	 *
-	 * @covers Kotchasan\Validator::idCard
-	 */
-	public function testIdCard2()
-	{
+    /**
+     * Generated from @assert ('0123456789015') [==] false.
+     *
+     * @covers Kotchasan\Validator::idCard
+     */
+    public function testIdCard2()
+    {
 
-		$this->assertFalse(
-			\Kotchasan\Validator::idCard('0123456789015')
-		);
-	}
+        $this->assertFalse(
+            \Kotchasan\Validator::idCard('0123456789015')
+        );
+    }
 
-	/**
-	 * @covers Kotchasan\Validator::isImage
-	 * @todo   Implement testIsImage().
-	 */
-	public function testIsImage()
-	{
-		// Remove the following lines when you implement this test.
-		$this->markTestIncomplete(
-			'This test has not been implemented yet.'
-		);
-	}
+    /**
+     * @covers Kotchasan\Validator::isImage
+     * @todo   Implement testIsImage().
+     */
+    public function testIsImage()
+    {
+        // Remove the following lines when you implement this test.
+        $this->markTestIncomplete(
+            'This test has not been implemented yet.'
+        );
+    }
 }

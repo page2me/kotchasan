@@ -1,5 +1,4 @@
 <?php
-
 namespace Kotchasan;
 
 /**
@@ -7,51 +6,51 @@ namespace Kotchasan;
  */
 class ProvinceTest extends \PHPUnit_Framework_TestCase
 {
-	/**
-	 * @var Province
-	 */
-	protected $object;
+    /**
+     * @var Province
+     */
+    protected $object;
 
-	/**
-	 * Sets up the fixture, for example, opens a network connection.
-	 * This method is called before a test is executed.
-	 */
-	protected function setUp()
-	{
-		$this->object = new Province;
-	}
+    /**
+     * Sets up the fixture, for example, opens a network connection.
+     * This method is called before a test is executed.
+     */
+    protected function setUp()
+    {
+        $this->object = new Province;
+    }
 
-	/**
-	 * Tears down the fixture, for example, closes a network connection.
-	 * This method is called after a test is executed.
-	 */
-	protected function tearDown()
-	{
+    /**
+     * Tears down the fixture, for example, closes a network connection.
+     * This method is called after a test is executed.
+     */
+    protected function tearDown()
+    {
 
-	}
+    }
 
-	/**
-	 * Generated from @assert (102) [==] 'กรุงเทพมหานคร'.
-	 *
-	 * @covers Kotchasan\Province::get
-	 */
-	public function testGet()
-	{
+    /**
+     * Generated from @assert (102) [==] 'กรุงเทพมหานคร'.
+     *
+     * @covers Kotchasan\Province::get
+     */
+    public function testGet()
+    {
 
-		$this->assertEquals(
-		'กรุงเทพมหานคร', \Kotchasan\Province::get(102)
-		);
-	}
+        $this->assertEquals(
+        'กรุงเทพมหานคร', \Kotchasan\Province::get(102)
+        );
+    }
 
-	/**
-	 * @covers Kotchasan\Province::all
-	 * @todo   Implement testAll().
-	 */
-	public function testAll()
-	{
-		// Remove the following lines when you implement this test.
-		$this->markTestIncomplete(
-		'This test has not been implemented yet.'
-		);
-	}
+    /**
+     * @covers Kotchasan\Province::all
+     * @todo   Implement testAll().
+     */
+    public function testAll()
+    {
+        // Remove the following lines when you implement this test.
+        $this->markTestIncomplete(
+        'This test has not been implemented yet.'
+        );
+    }
 }

@@ -1,5 +1,4 @@
 <?php
-
 namespace Kotchasan;
 
 /**
@@ -7,51 +6,51 @@ namespace Kotchasan;
  */
 class CountryTest extends \PHPUnit_Framework_TestCase
 {
-	/**
-	 * @var Country
-	 */
-	protected $object;
+    /**
+     * @var Country
+     */
+    protected $object;
 
-	/**
-	 * Sets up the fixture, for example, opens a network connection.
-	 * This method is called before a test is executed.
-	 */
-	protected function setUp()
-	{
-		$this->object = new Country;
-	}
+    /**
+     * Sets up the fixture, for example, opens a network connection.
+     * This method is called before a test is executed.
+     */
+    protected function setUp()
+    {
+        $this->object = new Country;
+    }
 
-	/**
-	 * Tears down the fixture, for example, closes a network connection.
-	 * This method is called after a test is executed.
-	 */
-	protected function tearDown()
-	{
+    /**
+     * Tears down the fixture, for example, closes a network connection.
+     * This method is called after a test is executed.
+     */
+    protected function tearDown()
+    {
 
-	}
+    }
 
-	/**
-	 * Generated from @assert ('TH') [==] 'ไทย'.
-	 *
-	 * @covers Kotchasan\Country::get
-	 */
-	public function testGet()
-	{
+    /**
+     * Generated from @assert ('TH') [==] 'ไทย'.
+     *
+     * @covers Kotchasan\Country::get
+     */
+    public function testGet()
+    {
 
-		$this->assertEquals(
-		'ไทย', \Kotchasan\Country::get('TH')
-		);
-	}
+        $this->assertEquals(
+        'ไทย', \Kotchasan\Country::get('TH')
+        );
+    }
 
-	/**
-	 * @covers Kotchasan\Country::all
-	 * @todo   Implement testAll().
-	 */
-	public function testAll()
-	{
-		// Remove the following lines when you implement this test.
-		$this->markTestIncomplete(
-		'This test has not been implemented yet.'
-		);
-	}
+    /**
+     * @covers Kotchasan\Country::all
+     * @todo   Implement testAll().
+     */
+    public function testAll()
+    {
+        // Remove the following lines when you implement this test.
+        $this->markTestIncomplete(
+        'This test has not been implemented yet.'
+        );
+    }
 }
