@@ -24,7 +24,7 @@ class View extends \Kotchasan\View
      * Youtube API Key ถ้า สามารถหาได้จาก
      * http://gcms.in.th/howto/การสร้างคีย์สำหรับใช้งาน_Youtube_API_V3.html
      */
-    $youtube_api_key = 'AIzaSyC2ivSRvKquKXDgmt3cpeqZUww8rO7Hbkk';
+    $youtube_api_key = '';
     /*
      * video ID เช่น https://www.youtube.com/watch?v=YPeMyo6F5UQ
      */
