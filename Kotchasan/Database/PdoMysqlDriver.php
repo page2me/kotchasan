@@ -269,6 +269,8 @@ class PdoMysqlDriver extends Driver
       }
     } elseif (isset($sqls['union'])) {
       $sql = '('.implode(') UNION (', $sqls['union']).')';
+    } elseif (isset($sqls['unionAll'])) {
+      $sql = '('.implode(') UNION ALL (', $sqls['unionAll']).')';
     } else {
       if (isset($sqls['select'])) {
         $sql = 'SELECT '.$sqls['select'];

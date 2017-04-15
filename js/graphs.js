@@ -30,10 +30,11 @@
         gridVColor: '#CDCDCD',
         showTitle: true,
         lineWidth: 2,
-        pieMargin: 10,
+        centerOffset: 10,
         centerX: null,
         centerY: null,
         labelOffset: 5,
+        ringWidth: 30,
         rotate: false,
         strokeColor: '#000000'
       };
@@ -181,7 +182,7 @@
           }
         }
         if (self.loading) {
-          if (options.type !== 'pie') {
+          if (options.type !== 'pie' && options.type !== 'donut') {
             self.canvas.addEvent('mousemove', _mouseMove);
           }
           self.loading = false;
@@ -338,12 +339,10 @@
       var context = this.context;
       var centerX = options.centerX == null ? Math.round(this.width / 2) : options.centerX;
       var centerY = options.centerY == null ? Math.round(this.height / 2) : options.centerY;
-      var radius = centerY - options.pieMargin;
+      var radius = centerY - options.centerOffset;
       var counter = 0.0;
       var chartStartAngle = -.5 * Math.PI;
       var sum = this.datas.rows[0].total;
-      var currentPullOutSlice = null;
-      var currentPullOutDistance = 20;
       forEach(this.datas.rows[0].items, function (item, index) {
         var fraction = item.value / sum;
         item.startAngle = (counter * Math.PI * 2);
@@ -353,6 +352,34 @@
         counter += fraction;
       });
       function drawSlice(slice, index) {
+        if (slice.percentage) {
+          var distance = (radius / 2.5) * (Math.pow(1 - (2.5 / radius), 0.8) + 1) + options.labelOffset;
+          var labelX = Math.round(centerX + Math.sin(slice.midAngle * Math.PI * 2) * distance);
+          var labelY = Math.round(centerY - Math.cos(slice.midAngle * Math.PI * 2) * distance);
+          var c = options.colors[index % options.colors.length];
+          context.strokeStyle = c;
+          context.beginPath();
+          context.moveTo(centerX, centerY);
+          context.lineTo(labelX, labelY);
+          if (labelX < 180) {
+            context.lineTo(labelX - 5, labelY);
+            context.textAlign = 'right';
+            labelX -= 10;
+          } else {
+            context.lineTo(labelX + 5, labelY);
+            context.textAlign = 'left';
+            labelX += 10;
+          }
+          context.textBaseline = 'middle';
+          context.stroke();
+          context.closePath();
+          context.fillStyle = c;
+          if (options.strokeColor) {
+            context.strokeStyle = options.strokeColor;
+            context.strokeText(slice.value, labelX, labelY);
+          }
+          context.fillText(slice.value, labelX, labelY);
+        }
         var startAngle = slice.startAngle + chartStartAngle;
         var endAngle = slice.endAngle + chartStartAngle;
         context.beginPath();
@@ -365,19 +392,6 @@
         context.lineWidth = 0;
         context.strokeStyle = self.backgroundColor;
         context.stroke();
-        if (slice.percentage) {
-          var o = slice == currentPullOutSlice ? currentPullOutDistance : 0;
-          var distance = ((radius + o) / 2.5) * (Math.pow(1 - (2.5 / (radius + o)), 0.8) + 1) + options.labelOffset;
-          var labelX = Math.round(centerX + Math.sin(slice.midAngle * Math.PI * 2) * distance);
-          var labelY = Math.round(centerY - Math.cos(slice.midAngle * Math.PI * 2) * distance);
-          context.textAlign = 'center';
-          context.fillStyle = options.colors[index % options.colors.length];
-          if (options.strokeColor) {
-            context.strokeStyle = options.strokeColor;
-            context.strokeText(slice.percentage + '%', labelX, labelY);
-          }
-          context.fillText(slice.percentage + '%', labelX, labelY);
-        }
       }
       function drawGraph() {
         context.save();
@@ -462,12 +476,10 @@
       var context = this.context;
       var centerX = options.centerX == null ? Math.round(this.width / 2) : options.centerX;
       var centerY = options.centerY == null ? Math.round(this.height / 2) : options.centerY;
-      var radius = centerY - options.pieMargin;
+      var radius = centerY - options.centerOffset;
       var counter = 0.0;
       var chartStartAngle = -.5 * Math.PI;
       var sum = this.datas.rows[0].total;
-      var currentPullOutSlice = null;
-      var currentPullOutDistance = 20;
       forEach(this.datas.rows[0].items, function (item, index) {
         var fraction = item.value / sum;
         item.startAngle = (counter * Math.PI * 2);
@@ -477,6 +489,34 @@
         counter += fraction;
       });
       function drawSlice(slice, index) {
+        if (slice.percentage) {
+          var distance = (radius / 2.5) * (Math.pow(1 - (2.5 / radius), 0.8) + 1) + options.labelOffset;
+          var labelX = Math.round(centerX + Math.sin(slice.midAngle * Math.PI * 2) * distance);
+          var labelY = Math.round(centerY - Math.cos(slice.midAngle * Math.PI * 2) * distance);
+          var c = options.colors[index % options.colors.length];
+          context.strokeStyle = c;
+          context.beginPath();
+          context.moveTo(centerX, centerY);
+          context.lineTo(labelX, labelY);
+          if (labelX < 180) {
+            context.lineTo(labelX - 5, labelY);
+            context.textAlign = 'right';
+            labelX -= 10;
+          } else {
+            context.lineTo(labelX + 5, labelY);
+            context.textAlign = 'left';
+            labelX += 10;
+          }
+          context.textBaseline = 'middle';
+          context.stroke();
+          context.closePath();
+          context.fillStyle = c;
+          if (options.strokeColor) {
+            context.strokeStyle = options.strokeColor;
+            context.strokeText(slice.value, labelX, labelY);
+          }
+          context.fillText(slice.value, labelX, labelY);
+        }
         var startAngle = slice.startAngle + chartStartAngle;
         var endAngle = slice.endAngle + chartStartAngle;
         context.beginPath();
@@ -486,22 +526,9 @@
         context.closePath();
         context.fillStyle = options.colors[index % options.colors.length];
         context.fill();
-        context.lineWidth = 1;
+        context.lineWidth = 0;
         context.strokeStyle = self.backgroundColor;
         context.stroke();
-        if (slice.percentage) {
-          var o = slice == currentPullOutSlice ? currentPullOutDistance : 0;
-          var distance = ((radius + o) / 2.5) * (Math.pow(1 - (2.5 / (radius + o)), 0.8) + 1) + options.labelOffset;
-          var labelX = Math.round(centerX + Math.sin(slice.midAngle * Math.PI * 2) * distance);
-          var labelY = Math.round(centerY - Math.cos(slice.midAngle * Math.PI * 2) * distance);
-          context.textAlign = 'center';
-          context.fillStyle = options.colors[index % options.colors.length];
-          if (options.strokeColor) {
-            context.strokeStyle = options.strokeColor;
-            context.strokeText(slice.percentage + '%', labelX, labelY);
-          }
-          context.fillText(slice.percentage + '%', labelX, labelY);
-        }
       }
       function drawGraph() {
         context.save();
@@ -514,7 +541,7 @@
         });
         context.fillStyle = self.backgroundColor;
         context.beginPath();
-        context.arc(centerX, centerY, radius - 20, 0, Math.PI * 2, false);
+        context.arc(centerX, centerY, radius - options.ringWidth, 0, Math.PI * 2, false);
         context.fill();
         context.restore();
         if (options.showTitle) {
@@ -545,7 +572,7 @@
         var xFromCenter = mouseX - centerX;
         var yFromCenter = mouseY - centerY;
         var distanceFromCenter = Math.sqrt(Math.pow(Math.abs(xFromCenter), 2) + Math.pow(Math.abs(yFromCenter), 2));
-        if (distanceFromCenter <= radius) {
+        if (distanceFromCenter <= radius && distanceFromCenter > radius - options.ringWidth) {
           var mouseAngle = Math.atan2(yFromCenter, xFromCenter) - chartStartAngle;
           if (mouseAngle < 0) {
             mouseAngle = 2 * Math.PI + mouseAngle;
