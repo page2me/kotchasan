@@ -29,7 +29,7 @@ class Schema
   /**
    * Database object
    *
-   * @var     Driver
+   * @var Driver
    */
   private $db;
 

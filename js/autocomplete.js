@@ -1,4 +1,4 @@
-/*
+/**
  * GAutoComplete
  *
  * @filesource js/autocomplete.js

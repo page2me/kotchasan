@@ -1,4 +1,4 @@
-/*
+/**
  * GMedia
  * swf player
  *

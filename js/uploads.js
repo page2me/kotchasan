@@ -1,4 +1,4 @@
-/*
+/**
  * GUploads
  * Javascript multiples upload
  *

@@ -1,4 +1,4 @@
-/*
+/**
  * GLoader
  * Javascript page load (Ajax)
  *

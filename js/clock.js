@@ -1,4 +1,4 @@
-/*
+/**
  * Clock
  * Javascript realtime Clock
  *

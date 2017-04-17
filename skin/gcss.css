@@ -1274,7 +1274,7 @@ html .sidemenu ul,
 .topmenu > ul ul > li.hover > a,
 .sidemenu ul > li:hover > a,
 .sidemenu ul > li.hover > a {
-  background-color: inherit;
+  background-color: #333;
   color: #FFF;
 }
 .topmenu > ul ul > li:hover:before,
@@ -3187,6 +3187,7 @@ td.buttons .button:last-child {
   body.responsive input.toggle-menu:checked ~ #slidemenu_content .menu_wrapper {
     position: absolute;
     top: 0;
+    left: 0;
     height: 100%;
     max-width: 100%;
     z-index: 1;

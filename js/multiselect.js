@@ -1,4 +1,4 @@
-/*
+/**
  * GMultiSelect
  * Multiple Dropdown Select
  *

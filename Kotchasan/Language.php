@@ -193,7 +193,7 @@ final class Language extends \Kotchasan\KBase
         }
       }
     }
-    // จัดกลุามภาษาตาม id
+    // จัดกลุ่มภาษาตาม id
     $datas = array();
     $i = 0;
     foreach ($languages as $key => $row) {

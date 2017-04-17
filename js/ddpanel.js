@@ -1,4 +1,4 @@
-/*
+/**
  * GDPanel
  * Javascript dropdown panel
  *

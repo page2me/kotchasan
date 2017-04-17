@@ -1,4 +1,4 @@
-/*
+/**
  * Javascript Libraly for Kotchasan Framework
  *
  * @filesource js/gajax.js

@@ -1,4 +1,4 @@
-/*
+/**
  * GGraphs
  * Javascript HTML5 graphs
  *

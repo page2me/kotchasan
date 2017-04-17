@@ -1,4 +1,4 @@
-/*
+/**
  * EditInPlace
  * Ajax in-place editor
  *

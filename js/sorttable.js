@@ -1,4 +1,4 @@
-/*
+/**
  * GSortTable
  * Javascript sort table
  *

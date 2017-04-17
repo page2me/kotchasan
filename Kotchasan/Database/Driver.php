@@ -331,15 +331,15 @@ abstract class Driver extends Query
   }
 
   /**
-   * ตรวจสอบฟิลด์
+   * ตรวจสอบคอลัมน์ของตารางว่ามีหรือไม่
    *
-   * @param string $table_name
-   * @param type $field
-   * @return boolean
+   * @param string $table_name ชื่อตาราง
+   * @param string $column_name ชื่อคอลัมน์
+   * @return boolean คืนค่า true ถ้ามี คืนค่า false ถ้าไม่มี
    */
-  public function fieldExists($table_name, $field)
+  public function fieldExists($table_name, $column_name)
   {
-    $result = $this->customQuery("SHOW COLUMNS FROM `$table_name` LIKE '$field'");
+    $result = $this->customQuery("SHOW COLUMNS FROM `$table_name` LIKE '$column_name'");
     return empty($result) ? false : true;
   }
 

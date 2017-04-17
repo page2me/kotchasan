@@ -1,4 +1,4 @@
-/*
+/**
  * GTable
  * Javascript data table for Kotchasan Framework
  *

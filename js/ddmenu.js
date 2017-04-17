@@ -1,4 +1,4 @@
-/*
+/**
  * GDDMenu
  * Responsive dropdown menu (WAI AAA)
  *
