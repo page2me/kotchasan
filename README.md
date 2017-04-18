@@ -1,3 +1,4 @@
+```if you do not understand please use the Google translate```
 # คชสาร เว็บเฟรมเวิร์ค (Kotchasan Web Framework)
 ช้างนอกจากจะเป็นสัญลักษณ์ของ PHP แล้ว ยังเป็นสัญลักษณ์ประจำชาติของเราอีก
 ผมเลยเลือกที่จะใช้ชื่อนี้เป็นชื่อของ Framework ที่ออกแบบโดยคนไทย 100%
