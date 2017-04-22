@@ -31,7 +31,7 @@ abstract class Query extends \Kotchasan\Database\Db
    * ฟังก์ชั่นสำหรับจัดกลุ่มคำสั่ง และ เชื่อมแต่ละกลุ่มด้วย AND
    *
    * @param array $params คำสั่ง รูปแบบ array('field1', 'condition', 'field2')
-   * @return string query ภายใต้ ()
+   * @return Sql
    */
   protected function groupAnd($params)
   {
@@ -42,14 +42,14 @@ abstract class Query extends \Kotchasan\Database\Db
     foreach ($params as $i => $item) {
       $sqls[] = $this->buildValue($item);
     }
-    return '('.implode(' AND ', $sqls).')';
+    return Sql::create('('.implode(' AND ', $sqls).')');
   }
 
   /**
    * ฟังก์ชั่นสำหรับจัดกลุ่มคำสั่ง และ เชื่อมแต่ละกลุ่มด้วย OR
    *
    * @param array $params คำสั่ง รูปแบบ array('field1', 'condition', 'field2')
-   * @return string
+   * @return Sql
    */
   protected function groupOr($params)
   {
@@ -60,7 +60,7 @@ abstract class Query extends \Kotchasan\Database\Db
     foreach ($params as $i => $item) {
       $sqls[] = $this->buildValue($item);
     }
-    return '('.implode(' OR ', $sqls).')';
+    return Sql::create('('.implode(' OR ', $sqls).')');
   }
 
   /**
